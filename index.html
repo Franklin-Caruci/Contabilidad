@@ -1187,21 +1187,38 @@
 
       <div class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
         
-        <!-- Detected Origin helper (Critical for Google Cloud Console) -->
+        <!-- Detected Origin helper (Informative only - detected by browser) -->
         <div class="bg-brand-950/40 border border-brand-800/80 p-3.5 rounded-2xl space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-brand-300">Origen de JavaScript para Google Cloud:</span>
-            <button type="button" onclick="gdrive.copyOrigin()" class="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium text-[11px] flex items-center space-x-1 shadow transition">
+            <div>
+              <span class="font-bold text-brand-300 block text-xs">ℹ️ Origen del Navegador (Detectado Automáticamente):</span>
+              <span class="text-[10px] text-slate-400">Esta casilla es solo informativa; no necesitas escribir nada aquí.</span>
+            </div>
+            <button type="button" onclick="gdrive.copyOrigin()" class="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium text-[11px] flex items-center space-x-1 shadow transition shrink-0">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              <span>Copiar Origen</span>
+              <span>Copiar</span>
             </button>
           </div>
           <div class="p-2 rounded-xl bg-slate-950 font-mono text-[11px] text-brand-200 border border-slate-800 break-all select-all" id="gdrive-detected-origin">
             https://...
           </div>
-          <p class="text-[10px] text-slate-400">
-            ⚠️ <strong>Importante:</strong> Pega exactamente este valor en <strong>"Orígenes autorizados de JavaScript"</strong> en tu ID de cliente de Google Cloud (sin barra final <code>/</code> y sin nombre de carpeta).
-          </p>
+          
+          <!-- Status when opened on GitHub Pages / Web Server -->
+          <div id="gdrive-web-protocol-status" class="text-[11px] text-emerald-300 flex items-start space-x-1.5 pt-1">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+            <span>¡Excelente! Tu PC está en el mismo origen web que tu teléfono. Solo pega tu <strong>Client ID</strong> y <strong>API Key</strong> abajo y presiona <strong>Guardar y Conectar</strong>.</span>
+          </div>
+
+          <!-- Alert if opened on PC as local file:/// -->
+          <div id="gdrive-file-protocol-warning" class="hidden p-2.5 rounded-xl bg-amber-950/70 border border-amber-700/80 text-[11px] text-amber-200 space-y-1">
+            <div class="flex items-center space-x-1.5 font-bold text-amber-300">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+              <span>Estás abriendo la aplicación desde tu disco duro (file://)</span>
+            </div>
+            <p class="text-slate-300">
+              Google Drive OAuth no permite conexiones desde archivos locales <code>file:///</code>. Para que sincronice en tu PC, <strong>abre tu navegador de la PC e ingresa la misma URL de GitHub Pages</strong> que usas en tu teléfono (ej. <code>https://tu-usuario.github.io/tu-repo/</code>).
+            </p>
+          </div>
         </div>
 
         <div>
@@ -3504,9 +3521,25 @@
       openConfigModal: () => {
         document.getElementById('modal-gdrive-config').classList.remove('hidden');
         const originEl = document.getElementById('gdrive-detected-origin');
+        const fileWarningEl = document.getElementById('gdrive-file-protocol-warning');
+        const webSuccessEl = document.getElementById('gdrive-web-protocol-status');
+
+        const isLocalFile = window.location.protocol === 'file:';
+
         if (originEl) {
-          originEl.textContent = window.location.origin;
+          originEl.textContent = isLocalFile ? 'file:// (Abierto localmente en disco)' : window.location.origin;
         }
+
+        if (fileWarningEl && webSuccessEl) {
+          if (isLocalFile) {
+            fileWarningEl.classList.remove('hidden');
+            webSuccessEl.classList.add('hidden');
+          } else {
+            fileWarningEl.classList.add('hidden');
+            webSuccessEl.classList.remove('hidden');
+          }
+        }
+
         if (gdrive.accessToken) {
           document.getElementById('gdrive-user-status').classList.remove('hidden');
         } else {
