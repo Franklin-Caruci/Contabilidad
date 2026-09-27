@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="50%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#042f2e"/>
+    </linearGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded App Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-grad)"/>
+  
+  <!-- Outer glowing border ring -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="#2dd4bf" stroke-width="4" stroke-opacity="0.3"/>
+
+  <!-- Main Emblem Group -->
+  <g filter="url(#shadow)">
+    <!-- Ledger Book Base -->
+    <path d="M128 110 C128 99, 137 90, 148 90 L364 90 C375 90, 384 99, 384 110 L384 390 C384 401, 375 410, 364 410 L148 410 C137 410, 128 401, 128 390 Z" fill="#1e293b"/>
+    <path d="M148 90 L188 90 L188 410 L148 410 Z" fill="#0f172a"/>
+    <line x1="188" y1="90" x2="188" y2="410" stroke="#334155" stroke-width="3"/>
+    
+    <!-- Ledger Page Trim & Lines -->
+    <rect x="204" y="120" width="160" height="12" rx="6" fill="#334155"/>
+    <rect x="204" y="148" width="120" height="8" rx="4" fill="#334155"/>
+    <rect x="204" y="170" width="140" height="8" rx="4" fill="#334155"/>
+
+    <!-- Scales of Balance / Double Entry Emblem -->
+    <!-- Pillar -->
+    <rect x="280" y="210" width="8" height="140" rx="4" fill="url(#gold-grad)"/>
+    <rect x="264" y="344" width="40" height="10" rx="5" fill="url(#gold-grad)"/>
+    <circle cx="284" cy="210" r="10" fill="url(#gold-grad)"/>
+    
+    <!-- Beam -->
+    <path d="M220 226 L348 226" stroke="url(#gold-grad)" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Left Scale (Debit) -->
+    <line x1="230" y1="226" x2="214" y2="266" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="230" y1="226" x2="246" y2="266" stroke="#94a3b8" stroke-width="2.5"/>
+    <path d="M204 266 Q230 286 256 266 Z" fill="url(#gold-grad)"/>
+
+    <!-- Right Scale (Credit) -->
+    <line x1="338" y1="226" x2="322" y2="266" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="338" y1="226" x2="354" y2="266" stroke="#94a3b8" stroke-width="2.5"/>
+    <path d="M312 266 Q338 286 364 266 Z" fill="url(#gold-grad)"/>
+
+    <!-- Bolívars Monogram Badge "Bs." -->
+    <circle cx="158" cy="350" r="44" fill="#0f766e" stroke="#2dd4bf" stroke-width="4"/>
+    <text x="158" y="362" font-family="system-ui, -apple-system, sans-serif" font-size="34" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-1">Bs.</text>
+  </g>
+</svg>
