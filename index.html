@@ -1172,7 +1172,7 @@
   <!-- MODAL 5: GOOGLE DRIVE CLOUD SYNC CONFIGURATION          -->
   <!-- ======================================================= -->
   <div id="modal-gdrive-config" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
       
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
         <div>
@@ -1185,19 +1185,27 @@
         <button onclick="gdrive.closeConfigModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-sm">✕</button>
       </div>
 
-      <div class="p-5 space-y-4 text-xs">
+      <div class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
         
-        <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 space-y-2">
-          <p class="font-semibold text-slate-200">¿Cómo funciona la sincronización?</p>
-          <p class="text-slate-400 leading-relaxed">
-            La aplicación utiliza el <strong>Google Identity Services SDK</strong> y la <strong>Google Drive API v3</strong>. 
-            Crea de forma segura un archivo maestro llamado <code class="text-brand-300">contabilidad_bolivares_master.json</code> en tu cuenta personal de Google Drive. 
-            Cada vez que guardes un asiento o cuenta, se sincronizará automáticamente.
+        <!-- Detected Origin helper (Critical for Google Cloud Console) -->
+        <div class="bg-brand-950/40 border border-brand-800/80 p-3.5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-brand-300">Origen de JavaScript para Google Cloud:</span>
+            <button type="button" onclick="gdrive.copyOrigin()" class="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium text-[11px] flex items-center space-x-1 shadow transition">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copiar Origen</span>
+            </button>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-950 font-mono text-[11px] text-brand-200 border border-slate-800 break-all select-all" id="gdrive-detected-origin">
+            https://...
+          </div>
+          <p class="text-[10px] text-slate-400">
+            ⚠️ <strong>Importante:</strong> Pega exactamente este valor en <strong>"Orígenes autorizados de JavaScript"</strong> en tu ID de cliente de Google Cloud (sin barra final <code>/</code> y sin nombre de carpeta).
           </p>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-300 mb-1">Google OAuth Client ID *</label>
+          <label class="block font-semibold text-slate-300 mb-1">Google OAuth Client ID (Tipo: Aplicación Web) *</label>
           <input type="text" id="gdrive-client-id" placeholder="Ej. 123456789-abcdef.apps.googleusercontent.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-brand-500">
         </div>
 
@@ -1206,10 +1214,18 @@
           <input type="text" id="gdrive-api-key" placeholder="Ej. AIzaSyB..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-brand-500">
         </div>
 
-        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1.5 text-[11px] text-slate-400">
-          <span class="font-semibold text-slate-300 block">Recordatorio de Configuración en Google Cloud Console:</span>
-          <p>1. Habilita <strong>Google Drive API v3</strong> en tu proyecto.</p>
-          <p>2. En tu Client ID de OAuth 2.0 (Tipo Aplicación Web), agrega en <strong>Orígenes de JavaScript autorizados</strong> la URL de tu GitHub Pages (ej. <code class="text-brand-400">https://tuusuario.github.io</code>) o tu servidor local.</p>
+        <!-- Troubleshooting Guide for OAuth 2.0 Policy Error -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2 text-[11px] text-slate-300">
+          <span class="font-bold text-amber-300 flex items-center space-x-1.5">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i>
+            <span>¿Te sale "Acceso bloqueado: error de autorización"? Verifica esto:</span>
+          </span>
+          <div class="space-y-1.5 pl-1 text-slate-400">
+            <p><strong>1. Usuarios de prueba (Muy importante):</strong> Si tu proyecto está en estado <em>"En prueba"</em> (Testing), ve en Google Cloud a <strong>Pantalla de consentimiento de OAuth</strong> &gt; <strong>Usuarios de prueba</strong> (Test users) y agrega tu correo Gmail. De lo contrario, Google bloqueará el inicio de sesión.</p>
+            <p><strong>2. Tipo de ID de Cliente:</strong> Debe ser de tipo <strong>"Aplicación web"</strong> (Web application). No uses "App de escritorio" ni "Android".</p>
+            <p><strong>3. Orígenes de JavaScript:</strong> Colócalo en la sección <em>"Orígenes autorizados de JavaScript"</em> (no en URIs de redireccionamiento).</p>
+            <p><strong>4. Permisos (Scopes):</strong> El sistema usa únicamente el alcance estándar y seguro <code>.../auth/drive.file</code> que no requiere verificaciones restringidas de Google.</p>
+          </div>
         </div>
 
         <div id="gdrive-user-status" class="hidden p-3 rounded-2xl bg-emerald-950/40 border border-emerald-800 text-emerald-300 flex items-center justify-between">
@@ -3434,7 +3450,7 @@
       CLIENT_ID_KEY: 'contabs_gdrive_client_id',
       API_KEY_KEY: 'contabs_gdrive_api_key',
       FILE_NAME: 'contabilidad_bolivares_master.json',
-      SCOPES: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata',
+      SCOPES: 'https://www.googleapis.com/auth/drive.file',
       
       tokenClient: null,
       accessToken: null,
@@ -3487,15 +3503,33 @@
 
       openConfigModal: () => {
         document.getElementById('modal-gdrive-config').classList.remove('hidden');
+        const originEl = document.getElementById('gdrive-detected-origin');
+        if (originEl) {
+          originEl.textContent = window.location.origin;
+        }
         if (gdrive.accessToken) {
           document.getElementById('gdrive-user-status').classList.remove('hidden');
         } else {
           document.getElementById('gdrive-user-status').classList.add('hidden');
         }
+        lucide.createIcons();
       },
 
       closeConfigModal: () => {
         document.getElementById('modal-gdrive-config').classList.add('hidden');
+      },
+
+      copyOrigin: () => {
+        const origin = window.location.origin;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(origin).then(() => {
+            showToast(`Origen copiado: ${origin}`, 'success');
+          }).catch(() => {
+            showToast(`Origen: ${origin}`, 'info');
+          });
+        } else {
+          showToast(`Origen: ${origin}`, 'info');
+        }
       },
 
       saveCredentialsAndConnect: () => {
@@ -3535,7 +3569,14 @@
             scope: gdrive.SCOPES,
             callback: async (resp) => {
               if (resp.error) {
-                showToast('Error de autenticación Google: ' + resp.error, 'error');
+                console.error('[GIS ERROR]', resp);
+                if (resp.error === 'popup_closed_by_user') {
+                  showToast('Se cerró la ventana de autenticación de Google.', 'info');
+                } else if (resp.error === 'access_denied') {
+                  showToast('Acceso denegado por el usuario.', 'warning');
+                } else {
+                  showToast('Error de autenticación Google: ' + (resp.error_description || resp.error), 'error');
+                }
                 return;
               }
               gdrive.accessToken = resp.access_token;
@@ -3551,8 +3592,10 @@
             }
           });
 
-          gdrive.tokenClient.requestAccessToken({ prompt: '' });
+          // Use prompt: 'consent' to guarantee Google displays the account & permission selector
+          gdrive.tokenClient.requestAccessToken({ prompt: 'consent' });
         } catch (err) {
+          console.error('[GIS INIT ERROR]', err);
           showToast('Error al iniciar Google Identity Services: ' + err.message, 'error');
         }
       },
