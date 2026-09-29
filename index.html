@@ -370,7 +370,17 @@
           <p class="text-xs text-slate-400 mt-0.5">Registro cronológico por partida doble con validación de cuadratura en tiempo real.</p>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Excel Import Button for Diario -->
+          <button onclick="excelImportDiario.openModal()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-emerald-950/70 text-emerald-300 border border-emerald-800 hover:bg-emerald-900/60 transition shadow-sm">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Importar Excel</span>
+          </button>
+          <!-- Excel Export Button for Diario -->
+          <button onclick="asientos.exportDiarioExcel()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+            <span>Exportar Excel</span>
+          </button>
           <button onclick="asientos.exportDiarioCSV()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition">
             <i data-lucide="file-text" class="w-4 h-4 text-sky-400"></i>
             <span>Exportar CSV</span>
@@ -438,7 +448,12 @@
           <p class="text-xs text-slate-400 mt-0.5">Movimientos cronológicos detallados y cálculo acumulativo de saldo por cuenta contable.</p>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Excel Import Button for Mayor -->
+          <button onclick="excelImportMayor.openModal()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-emerald-950/70 text-emerald-300 border border-emerald-800 hover:bg-emerald-900/60 transition shadow-sm">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Importar Excel</span>
+          </button>
           <button onclick="mayor.exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition">
             <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
             <span>Exportar Excel</span>
@@ -1071,6 +1086,319 @@
         </button>
         <button id="btn-confirm-import" onclick="excelImport.executeImport()" disabled class="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500 text-white shadow-md transition">
           Confirmar e Importar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: IMPORTAR AL LIBRO DIARIO DESDE EXCEL (SheetJS)   -->
+  <!-- ======================================================= -->
+  <div id="modal-import-diario" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        <div>
+          <h3 class="font-bold text-white text-base sm:text-lg flex items-center space-x-2">
+            <span>Importar al Libro Diario desde Excel</span>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">SheetJS .xlsx / .csv</span>
+          </h3>
+          <p class="text-xs text-slate-400">Carga asientos contables por partida doble o cuentas para registrar transacciones.</p>
+        </div>
+        <button onclick="excelImportDiario.closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-sm">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+        
+        <!-- Toggle Tabs: Asientos de Diario vs Catálogo de Cuentas -->
+        <div class="flex items-center justify-between bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+          <div class="flex space-x-1">
+            <button id="diario-tab-btn-asientos" onclick="excelImportDiario.switchMode('asientos')" class="px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-brand-600 text-white transition flex items-center space-x-1.5 shadow">
+              <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+              <span>Asientos Contables (Transacciones)</span>
+            </button>
+            <button id="diario-tab-btn-cuentas" onclick="excelImportDiario.switchMode('cuentas')" class="px-3.5 py-1.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition flex items-center space-x-1.5">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+              <span>Catálogo de Cuentas (PUC)</span>
+            </button>
+          </div>
+          <span class="hidden sm:inline text-[11px] text-slate-500 font-mono">Partida Doble VEN-NIF</span>
+        </div>
+
+        <!-- Template Download Banner -->
+        <div class="bg-brand-950/40 border border-brand-800/60 p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p class="font-semibold text-brand-300 flex items-center space-x-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-brand-400"></i>
+              <span id="diario-template-title">¿No tienes el formato de asientos listo?</span>
+            </p>
+            <p class="text-slate-400 text-[11px] mt-0.5" id="diario-template-desc">Descarga nuestra plantilla oficial con asientos de ejemplo balanceados en Bolívares (VES).</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button onclick="excelImportDiario.downloadTemplateDiario()" class="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs flex items-center space-x-1 shadow transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Plantilla Diario (.xlsx)</span>
+            </button>
+            <button onclick="excelImportDiario.downloadTemplatePUC()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs flex items-center space-x-1 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Plantilla Cuentas (.xlsx)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Drop Zone / File Input -->
+        <div id="diario-drop-zone" 
+          onclick="excelImportDiario.triggerFileInput()" 
+          ondragover="excelImportDiario.onDragOver(event)" 
+          ondragenter="excelImportDiario.onDragEnter(event)" 
+          ondragleave="excelImportDiario.onDragLeave(event)" 
+          ondrop="excelImportDiario.onDrop(event)" 
+          class="border-2 border-dashed border-slate-700 hover:border-brand-500 rounded-2xl p-6 text-center bg-slate-950 cursor-pointer transition select-none group">
+          <input type="file" id="diario-excel-file-input" accept=".xlsx, .xls, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv" onchange="excelImportDiario.handleFileInput(event)" class="hidden">
+          
+          <div id="diario-drop-zone-idle" class="space-y-2 pointer-events-none">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-950/70 border border-emerald-800/80 flex items-center justify-center text-emerald-400 group-hover:scale-105 group-hover:border-brand-400 transition-all">
+              <i data-lucide="file-spreadsheet" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <p class="font-bold text-white text-sm">Haz clic aquí o arrastra tu archivo Excel</p>
+              <p class="text-slate-400 text-xs mt-0.5">Compatible con libros contables en formato <span class="text-brand-300 font-mono font-medium">.xlsx</span>, <span class="text-brand-300 font-mono font-medium">.xls</span> y <span class="text-brand-300 font-mono font-medium">.csv</span></p>
+            </div>
+            <div class="pt-2">
+              <button type="button" onclick="event.stopPropagation(); excelImportDiario.triggerFileInput();" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-brand-600 text-white font-medium text-xs border border-slate-700 transition pointer-events-auto shadow-md">
+                Seleccionar Archivo del Computador
+              </button>
+            </div>
+            <p class="text-slate-500 text-[11px] pt-1">Detección automática de encabezados: Asiento, Fecha, Concepto, Código, Debe, Haber</p>
+          </div>
+
+          <div id="diario-drop-zone-loaded" class="hidden space-y-2 pointer-events-none">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-950 border border-emerald-500 flex items-center justify-center text-emerald-300">
+              <i data-lucide="check" class="w-6 h-6"></i>
+            </div>
+            <p id="diario-loaded-file-name" class="font-bold text-emerald-300 text-sm">archivo.xlsx</p>
+            <p id="diario-loaded-file-info" class="text-slate-400 text-xs">Archivo leído exitosamente</p>
+            <div class="pt-1">
+              <button type="button" onclick="event.stopPropagation(); excelImportDiario.triggerFileInput();" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs border border-slate-700 transition pointer-events-auto">
+                Cambiar de archivo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column Mapping Section for Asientos -->
+        <div id="diario-mapping-section" class="hidden bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-200 flex items-center space-x-1.5">
+              <i data-lucide="sliders" class="w-4 h-4 text-brand-400"></i>
+              <span>Mapeo Inteligente de Columnas (Libro Diario)</span>
+            </h4>
+            <span class="text-[11px] text-slate-400">Asegúrate de que cada columna coincida con tu archivo</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Asiento # / Nro:</label>
+              <select id="map-diario-num" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Fecha:</label>
+              <select id="map-diario-fecha" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Doc / Referencia:</label>
+              <select id="map-diario-ref" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Concepto General:</label>
+              <select id="map-diario-concepto" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Código Cuenta *:</label>
+              <select id="map-diario-codigo" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Nombre Cuenta:</label>
+              <select id="map-diario-nombre" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Débito (Debe Bs.) *:</label>
+              <select id="map-diario-debe" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-emerald-400 font-mono"></select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Crédito (Haber Bs.) *:</label>
+              <select id="map-diario-haber" onchange="excelImportDiario.applyMapping()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-sky-400 font-mono"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="diario-preview-section" class="hidden space-y-3">
+          
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+              <span class="text-[10px] uppercase text-slate-400 block font-medium">Asientos</span>
+              <span id="diario-prev-asientos-count" class="font-mono font-bold text-sm text-brand-300">0</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+              <span class="text-[10px] uppercase text-slate-400 block font-medium">Total Debe (Bs.)</span>
+              <span id="diario-prev-total-debe" class="font-mono font-bold text-sm text-emerald-400">Bs. 0,00</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+              <span class="text-[10px] uppercase text-slate-400 block font-medium">Total Haber (Bs.)</span>
+              <span id="diario-prev-total-haber" class="font-mono font-bold text-sm text-sky-400">Bs. 0,00</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+              <span class="text-[10px] uppercase text-slate-400 block font-medium">Cuentas Nuevas</span>
+              <span id="diario-prev-new-accounts" class="font-mono font-bold text-sm text-amber-300">0</span>
+            </div>
+          </div>
+
+          <!-- Balance Status Banner -->
+          <div id="diario-prev-balance-alert" class="p-2.5 rounded-xl border text-xs flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i id="diario-prev-balance-icon" data-lucide="check-circle" class="w-4 h-4"></i>
+              <span id="diario-prev-balance-msg" class="font-semibold">Verificando cuadratura...</span>
+            </div>
+            <span id="diario-prev-balance-diff" class="font-mono text-[11px] font-bold"></span>
+          </div>
+
+          <!-- Options Bar -->
+          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <label class="flex items-center space-x-2 cursor-pointer text-slate-300">
+              <input type="checkbox" id="check-auto-create-accounts" checked class="rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-brand-500">
+              <span>Crear automáticamente cuentas faltantes en el catálogo PUC</span>
+            </label>
+            <div class="flex items-center space-x-3 text-slate-300">
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="radio" name="diario-import-mode" value="merge" checked>
+                <span>Agregar a existentes</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="radio" name="diario-import-mode" value="replace">
+                <span class="text-rose-400">Reemplazar todos</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Preview Table -->
+          <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 max-h-56">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase sticky top-0 border-b border-slate-800">
+                <tr>
+                  <th class="py-2 px-3">Asiento</th>
+                  <th class="py-2 px-3">Fecha</th>
+                  <th class="py-2 px-3">Cuenta</th>
+                  <th class="py-2 px-3">Concepto / Detalle</th>
+                  <th class="py-2 px-3 text-right text-emerald-400">Debe (Bs.)</th>
+                  <th class="py-2 px-3 text-right text-sky-400">Haber (Bs.)</th>
+                </tr>
+              </thead>
+              <tbody id="diario-preview-tbody" class="divide-y divide-slate-800/80 tabular-nums">
+                <!-- Preview rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="px-5 py-3 border-t border-slate-800 flex items-center justify-end space-x-2 bg-slate-950">
+        <button onclick="excelImportDiario.closeModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-slate-800 transition">
+          Cancelar
+        </button>
+        <button id="btn-confirm-import-diario" onclick="excelImportDiario.executeImport()" disabled class="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500 text-white shadow-md transition flex items-center space-x-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Confirmar e Importar Asientos</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: IMPORTAR AL LIBRO MAYOR DESDE EXCEL              -->
+  <!-- ======================================================= -->
+  <div id="modal-import-mayor" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        <div>
+          <h3 class="font-bold text-white text-base sm:text-lg flex items-center space-x-2">
+            <span>Importar al Libro Mayor desde Excel</span>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">Cuentas y Movimientos</span>
+          </h3>
+          <p class="text-xs text-slate-400">Alimenta el Libro Mayor importando tu Catálogo de Cuentas o tus Movimientos Contables.</p>
+        </div>
+        <button onclick="excelImportMayor.closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-sm">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+        
+        <!-- Informational Banner -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-1.5">
+          <div class="flex items-center space-x-2 font-semibold text-brand-300">
+            <i data-lucide="info" class="w-4 h-4 text-brand-400"></i>
+            <span>¿Cómo funciona el Libro Mayor General?</span>
+          </div>
+          <p class="text-slate-400 text-[11px] leading-relaxed">
+            El Libro Mayor calcula automáticamente los saldos acumulados de cada cuenta contable agrupando los Asientos del Libro Diario. Puedes importar tu <strong>Catálogo de Cuentas (PUC)</strong> para disponer de las cuentas contables, o importar tus <strong>Asientos y Movimientos</strong> para poblar los débitos, créditos y saldos del Mayor.
+          </p>
+        </div>
+
+        <!-- Choice Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          
+          <!-- Card 1: Importar Cuentas PUC -->
+          <div class="bg-slate-950/70 border border-slate-800 hover:border-brand-500 rounded-2xl p-4 space-y-3 transition flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-brand-950 border border-brand-800 flex items-center justify-center text-brand-300 mb-2">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">1. Importar Catálogo de Cuentas (PUC)</h4>
+              <p class="text-slate-400 text-[11px] mt-1">Carga tu lista de cuentas reales y nominales (Código, Nombre, Naturaleza D/A, Imputable SI/NO).</p>
+            </div>
+            <div class="space-y-2 pt-2 border-t border-slate-800/80">
+              <button onclick="excelImportMayor.launchAccountImport()" class="w-full py-2 px-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow transition">
+                <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+                <span>Cargar Cuentas PUC</span>
+              </button>
+              <button onclick="excelImport.downloadTemplate()" class="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] flex items-center justify-center space-x-1 transition">
+                <i data-lucide="download" class="w-3 h-3 text-emerald-400"></i>
+                <span>Descargar Plantilla PUC (.xlsx)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Importar Asientos / Movimientos del Mayor -->
+          <div class="bg-slate-950/70 border border-slate-800 hover:border-emerald-500 rounded-2xl p-4 space-y-3 transition flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-300 mb-2">
+                <i data-lucide="receipt" class="w-5 h-5"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">2. Importar Asientos y Movimientos</h4>
+              <p class="text-slate-400 text-[11px] mt-1">Carga tus registros contables con partida doble para alimentar los movimientos y saldos del Libro Mayor.</p>
+            </div>
+            <div class="space-y-2 pt-2 border-t border-slate-800/80">
+              <button onclick="excelImportMayor.launchDiarioImport()" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow transition">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                <span>Cargar Asientos y Movimientos</span>
+              </button>
+              <button onclick="excelImportDiario.downloadTemplateDiario()" class="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] flex items-center justify-center space-x-1 transition">
+                <i data-lucide="download" class="w-3 h-3 text-emerald-400"></i>
+                <span>Descargar Plantilla Movimientos (.xlsx)</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="px-5 py-3 border-t border-slate-800 flex items-center justify-end bg-slate-950">
+        <button onclick="excelImportMayor.closeModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-slate-800 transition">
+          Cerrar
         </button>
       </div>
 
@@ -2405,6 +2733,675 @@
     };
 
     /**
+     * MODULE: EXCEL IMPORT FOR LIBRO DIARIO
+     */
+    const excelImportDiario = {
+      activeMode: 'asientos', // 'asientos' | 'cuentas'
+      parsedRows: [],
+      detectedColumns: [],
+      groupedEntries: [],
+      newAccountsDetected: [],
+      totalDebe: 0,
+      totalHaber: 0,
+      isBalanced: false,
+
+      openModal: (mode = 'asientos') => {
+        excelImportDiario.switchMode(mode);
+        document.getElementById('modal-import-diario').classList.remove('hidden');
+        document.getElementById('diario-mapping-section').classList.add('hidden');
+        document.getElementById('diario-preview-section').classList.add('hidden');
+
+        const confirmBtn = document.getElementById('btn-confirm-import-diario');
+        if (confirmBtn) {
+          confirmBtn.setAttribute('disabled', 'true');
+          confirmBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        const fileInput = document.getElementById('diario-excel-file-input');
+        if (fileInput) fileInput.value = '';
+
+        const idle = document.getElementById('diario-drop-zone-idle');
+        const loaded = document.getElementById('diario-drop-zone-loaded');
+        if (idle && loaded) {
+          idle.classList.remove('hidden');
+          loaded.classList.add('hidden');
+        }
+
+        excelImportDiario.parsedRows = [];
+        excelImportDiario.detectedColumns = [];
+        excelImportDiario.groupedEntries = [];
+        excelImportDiario.newAccountsDetected = [];
+        excelImportDiario.totalDebe = 0;
+        excelImportDiario.totalHaber = 0;
+        excelImportDiario.isBalanced = false;
+
+        lucide.createIcons();
+      },
+
+      closeModal: () => {
+        document.getElementById('modal-import-diario').classList.add('hidden');
+      },
+
+      switchMode: (mode) => {
+        excelImportDiario.activeMode = mode;
+        const btnAsientos = document.getElementById('diario-tab-btn-asientos');
+        const btnCuentas = document.getElementById('diario-tab-btn-cuentas');
+        const titleEl = document.getElementById('diario-template-title');
+        const descEl = document.getElementById('diario-template-desc');
+        const confirmBtn = document.getElementById('btn-confirm-import-diario');
+
+        if (mode === 'asientos') {
+          if (btnAsientos) {
+            btnAsientos.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-brand-600 text-white transition flex items-center space-x-1.5 shadow';
+          }
+          if (btnCuentas) {
+            btnCuentas.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+          }
+          if (titleEl) titleEl.textContent = '¿No tienes el formato de asientos listo?';
+          if (descEl) descEl.textContent = 'Descarga nuestra plantilla oficial con asientos de ejemplo balanceados en Bolívares (VES).';
+          if (confirmBtn && confirmBtn.querySelector('span')) confirmBtn.querySelector('span').textContent = 'Confirmar e Importar Asientos';
+        } else {
+          if (btnCuentas) {
+            btnCuentas.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs bg-brand-600 text-white transition flex items-center space-x-1.5 shadow';
+          }
+          if (btnAsientos) {
+            btnAsientos.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+          }
+          if (titleEl) titleEl.textContent = '¿No tienes el catálogo de cuentas listo?';
+          if (descEl) descEl.textContent = 'Descarga nuestra plantilla oficial con la estructura de cuentas PUC para importar.';
+          if (confirmBtn && confirmBtn.querySelector('span')) confirmBtn.querySelector('span').textContent = 'Confirmar e Importar Cuentas PUC';
+        }
+
+        if (excelImportDiario.parsedRows.length > 0) {
+          excelImportDiario.setupMappingSelectors(excelImportDiario.detectedColumns);
+          excelImportDiario.applyMapping();
+        }
+      },
+
+      triggerFileInput: () => {
+        const input = document.getElementById('diario-excel-file-input');
+        if (input) {
+          input.value = '';
+          input.click();
+        }
+      },
+
+      onDragOver: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const zone = document.getElementById('diario-drop-zone');
+        if (zone) {
+          zone.classList.add('border-brand-400', 'bg-brand-950/40');
+          zone.classList.remove('border-slate-700', 'bg-slate-950');
+        }
+      },
+
+      onDragEnter: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      },
+
+      onDragLeave: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const zone = document.getElementById('diario-drop-zone');
+        if (zone) {
+          zone.classList.remove('border-brand-400', 'bg-brand-950/40');
+          zone.classList.add('border-slate-700', 'bg-slate-950');
+        }
+      },
+
+      onDrop: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const zone = document.getElementById('diario-drop-zone');
+        if (zone) {
+          zone.classList.remove('border-brand-400', 'bg-brand-950/40');
+          zone.classList.add('border-slate-700', 'bg-slate-950');
+        }
+        const dt = event.dataTransfer;
+        if (dt && dt.files && dt.files.length > 0) {
+          excelImportDiario.processFile(dt.files[0]);
+        }
+      },
+
+      handleFileInput: (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) {
+          excelImportDiario.processFile(file);
+        }
+      },
+
+      downloadTemplateDiario: () => {
+        if (typeof XLSX === 'undefined') {
+          showToast('La librería SheetJS aún se está cargando. Intenta de nuevo en unos segundos.', 'warning');
+          return;
+        }
+
+        const templateRows = [
+          ['ASIENTO_NUM', 'FECHA', 'REFERENCIA', 'CONCEPTO_GENERAL', 'CODIGO_CUENTA', 'NOMBRE_CUENTA', 'DETALLE_LINEA', 'DEBE_BS', 'HABER_BS'],
+          [1, '2026-01-05', 'APERTURA-001', 'Asiento de Constitucion y Apertura de Operaciones', '1.1.01.03', 'Banco de Venezuela', 'Aporte en cuenta corriente', 150000, 0],
+          [1, '2026-01-05', 'APERTURA-001', 'Asiento de Constitucion y Apertura de Operaciones', '1.2.01.01', 'Mobiliario y Equipos de Oficina', 'Aporte mobiliario operativo', 35000, 0],
+          [1, '2026-01-05', 'APERTURA-001', 'Asiento de Constitucion y Apertura de Operaciones', '1.2.01.02', 'Equipos de Computacion', 'Equipos informaticos socios', 25000, 0],
+          [1, '2026-01-05', 'APERTURA-001', 'Asiento de Constitucion y Apertura de Operaciones', '3.1.01', 'Capital Social Suscrito y Pagado', 'Capital social registrado', 0, 210000],
+          [2, '2026-01-10', 'FAC-00189', 'Compra de mercancias para inventario s/f 00189', '1.1.04.01', 'Inventario de Mercancias', 'Entrada lote 01 al almacen', 40000, 0],
+          [2, '2026-01-10', 'FAC-00189', 'Compra de mercancias para inventario s/f 00189', '1.1.03.01', 'IVA Credito Fiscal', 'IVA 16% soportado', 6400, 0],
+          [2, '2026-01-10', 'FAC-00189', 'Compra de mercancias para inventario s/f 00189', '1.1.01.03', 'Banco de Venezuela', 'Pago transferencia bancaria', 0, 46400],
+          [3, '2026-01-15', 'VTA-0001', 'Venta de mercancias al contado s/f 0001', '1.1.01.03', 'Banco de Venezuela', 'Cobro inmediato en cuenta', 81200, 0],
+          [3, '2026-01-15', 'VTA-0001', 'Venta de mercancias al contado s/f 0001', '4.1.01', 'Ventas de Mercancias', 'Ingreso bruto facturado', 0, 70000],
+          [3, '2026-01-15', 'VTA-0001', 'Venta de mercancias al contado s/f 0001', '2.1.02.01', 'IVA Debito Fiscal', 'IVA 16% generado en ventas', 0, 11200],
+          [4, '2026-01-15', 'VTA-0001', 'Descargo de inventario por costo de ventas Factura 0001', '5.1.01', 'Costo de Ventas Mercancias', 'Costo asociado a factura 0001', 25000, 0],
+          [4, '2026-01-15', 'VTA-0001', 'Descargo de inventario por costo de ventas Factura 0001', '1.1.04.01', 'Inventario de Mercancias', 'Salida fisica de inventario', 0, 25000],
+          [5, '2026-01-20', 'SERV-2026-01', 'Pago de internet y servicios de telecomunicaciones', '6.1.04', 'Servicios Basicos (Luz, Agua, Internet)', 'Recibo mensual de conectividad', 1200, 0],
+          [5, '2026-01-20', 'SERV-2026-01', 'Pago de internet y servicios de telecomunicaciones', '1.1.03.01', 'IVA Credito Fiscal', 'IVA 16% servicios', 192, 0],
+          [5, '2026-01-20', 'SERV-2026-01', 'Pago de internet y servicios de telecomunicaciones', '1.1.01.03', 'Banco de Venezuela', 'Transferencia bancaria pago', 0, 1392]
+        ];
+
+        const instrucciones = [
+          ['INSTRUCCIONES PARA LLENAR LA PLANTILLA DEL LIBRO DIARIO GENERAL'],
+          [''],
+          ['1. ASIENTO_NUM: Numero consecutivo del asiento (1, 2, 3...). Todas las lineas con el mismo numero pertenecen al mismo asiento.'],
+          ['2. FECHA: Formato AAAA-MM-DD (ej. 2026-01-15) o DD/MM/AAAA.'],
+          ['3. REFERENCIA: Comprobante o documento de respaldo (Factura, Recibo, Transferencia).'],
+          ['4. CONCEPTO_GENERAL: Glosa o descripcion general del asiento contable.'],
+          ['5. CODIGO_CUENTA: Codigo contable de la cuenta (ej. 1.1.01.03).'],
+          ['6. NOMBRE_CUENTA: Nombre de la cuenta contable.'],
+          ['7. DETALLE_LINEA: Detalle opcional para la linea contable.'],
+          ['8. DEBE_BS: Monto del debito en Bolivares (colocar 0 si va al haber).'],
+          ['9. HABER_BS: Monto del credito en Bolivares (colocar 0 si va al debe).'],
+          ['10. PARTIDA DOBLE: Para cada asiento, la suma de DEBE_BS debe ser igual a la suma de HABER_BS.']
+        ];
+
+        const wsDiario = XLSX.utils.aoa_to_sheet(templateRows);
+        wsDiario['!cols'] = [
+          { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 36 },
+          { wch: 16 }, { wch: 30 }, { wch: 28 }, { wch: 18 }, { wch: 18 }
+        ];
+
+        const wsInst = XLSX.utils.aoa_to_sheet(instrucciones);
+        wsInst['!cols'] = [{ wch: 80 }];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, wsDiario, 'Libro_Diario');
+        XLSX.utils.book_append_sheet(wb, wsInst, 'Instrucciones');
+        XLSX.writeFile(wb, 'Plantilla_Libro_Diario_Bolivares.xlsx');
+        showToast('Plantilla oficial del Libro Diario descargada con éxito.', 'success');
+      },
+
+      downloadTemplatePUC: () => {
+        excelImport.downloadTemplate();
+      },
+
+      processFile: (file) => {
+        if (!file) return;
+
+        if (typeof XLSX === 'undefined') {
+          showToast('Error: SheetJS no está cargado. Revisa tu conexión a internet.', 'error');
+          return;
+        }
+
+        const idle = document.getElementById('diario-drop-zone-idle');
+        const loaded = document.getElementById('diario-drop-zone-loaded');
+        const fileNameEl = document.getElementById('diario-loaded-file-name');
+        const fileInfoEl = document.getElementById('diario-loaded-file-info');
+
+        if (idle && loaded) {
+          idle.classList.add('hidden');
+          loaded.classList.remove('hidden');
+          if (fileNameEl) fileNameEl.textContent = file.name;
+          if (fileInfoEl) fileInfoEl.textContent = `${(file.size / 1024).toFixed(1)} KB • Procesando datos...`;
+        }
+
+        const reader = new FileReader();
+        reader.onerror = () => {
+          showToast('Error al leer el archivo en el navegador.', 'error');
+          if (idle && loaded) {
+            idle.classList.remove('hidden');
+            loaded.classList.add('hidden');
+          }
+        };
+
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+              showToast('El archivo Excel no contiene hojas.', 'error');
+              return;
+            }
+
+            let sheetName = workbook.SheetNames[0];
+            const targetSheet = workbook.SheetNames.find(s => /diario|asiento|transacc/i.test(s));
+            if (targetSheet) sheetName = targetSheet;
+
+            const worksheet = workbook.Sheets[sheetName];
+            const rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+            if (!rawJson || rawJson.length === 0) {
+              showToast('La hoja de cálculo está vacía.', 'error');
+              return;
+            }
+
+            let headerRowIndex = 0;
+            let foundHeader = false;
+
+            for (let i = 0; i < Math.min(15, rawJson.length); i++) {
+              const row = rawJson[i];
+              if (row && Array.isArray(row)) {
+                const rowStr = row.map(cell => String(cell || '').toLowerCase()).join(' ');
+                if (/asiento|fecha|ref|concepto|debe|haber|debito|credito|cuenta|codigo/i.test(rowStr)) {
+                  headerRowIndex = i;
+                  foundHeader = true;
+                  break;
+                }
+              }
+            }
+
+            let headers = [];
+            let dataRows = [];
+
+            if (foundHeader) {
+              headers = rawJson[headerRowIndex].map((h, i) => String(h || '').trim() || `Columna ${i + 1}`);
+              dataRows = rawJson.slice(headerRowIndex + 1);
+            } else {
+              const maxCols = Math.max(...rawJson.map(r => (r && r.length) || 0), 1);
+              headers = Array.from({ length: maxCols }, (_, i) => `Columna ${i + 1}`);
+              dataRows = rawJson;
+            }
+
+            dataRows = dataRows.filter(r => r && Array.isArray(r) && r.some(c => String(c || '').trim() !== ''));
+
+            if (dataRows.length === 0) {
+              showToast('El archivo no contiene filas de datos.', 'warning');
+              return;
+            }
+
+            excelImportDiario.detectedColumns = headers;
+            excelImportDiario.parsedRows = dataRows;
+
+            const headersStr = headers.join(' ').toLowerCase();
+            if (/debe|haber|debito|credito|monto/i.test(headersStr)) {
+              excelImportDiario.switchMode('asientos');
+            } else if (/nat|naturaleza/i.test(headersStr)) {
+              excelImportDiario.switchMode('cuentas');
+            }
+
+            excelImportDiario.setupMappingSelectors(headers);
+            excelImportDiario.applyMapping();
+
+            document.getElementById('diario-mapping-section').classList.remove('hidden');
+            document.getElementById('diario-preview-section').classList.remove('hidden');
+
+            if (fileInfoEl) {
+              fileInfoEl.textContent = `${(file.size / 1024).toFixed(1)} KB • ${dataRows.length} filas leídas en "${sheetName}"`;
+            }
+
+            lucide.createIcons();
+          } catch (err) {
+            console.error('[DIARIO EXCEL ERROR]', err);
+            showToast('Error al procesar archivo Excel: ' + err.message, 'error');
+            if (idle && loaded) {
+              idle.classList.remove('hidden');
+              loaded.classList.add('hidden');
+            }
+          }
+        };
+
+        reader.readAsArrayBuffer(file);
+      },
+
+      setupMappingSelectors: (headers) => {
+        const findMatch = (patterns) => {
+          for (let i = 0; i < headers.length; i++) {
+            const h = headers[i].toLowerCase();
+            for (const p of patterns) {
+              if (p.test(h)) return i;
+            }
+          }
+          return -1;
+        };
+
+        const numIdx = findMatch([/^asiento/i, /nro/i, /num/i, /comprobante/i, /voucher/i]);
+        const fechaIdx = findMatch([/fecha/i, /date/i, /dia/i]);
+        const refIdx = findMatch([/ref/i, /doc/i, /factura/i, /comprobante/i]);
+        const conceptoIdx = findMatch([/concepto/i, /glosa/i, /desc/i, /detalle/i]);
+        const codigoIdx = findMatch([/c[oó]d/i, /cuenta.*c[oó]d/i, /cta/i]);
+        const nombreIdx = findMatch([/nombre/i, /denominaci[oó]n/i, /cuenta/i]);
+        const debeIdx = findMatch([/debe/i, /d[eé]bito/i, /cargo/i]);
+        const haberIdx = findMatch([/haber/i, /cr[eé]dito/i, /abono/i]);
+
+        const populate = (id, matchIdx, fallback) => {
+          const sel = document.getElementById(id);
+          if (!sel) return;
+          const chosen = matchIdx !== -1 ? matchIdx : Math.min(fallback, headers.length - 1);
+          sel.innerHTML = headers.map((h, i) => `
+            <option value="${i}" ${i === chosen ? 'selected' : ''}>${h || 'Columna ' + (i + 1)}</option>
+          `).join('');
+        };
+
+        populate('map-diario-num', numIdx, 0);
+        populate('map-diario-fecha', fechaIdx, 1);
+        populate('map-diario-ref', refIdx, 2);
+        populate('map-diario-concepto', conceptoIdx, 3);
+        populate('map-diario-codigo', codigoIdx, 4);
+        populate('map-diario-nombre', nombreIdx, 5);
+        populate('map-diario-debe', debeIdx, 7);
+        populate('map-diario-haber', haberIdx, 8);
+      },
+
+      applyMapping: () => {
+        const numIdx = parseInt(document.getElementById('map-diario-num')?.value || '0', 10);
+        const fechaIdx = parseInt(document.getElementById('map-diario-fecha')?.value || '1', 10);
+        const refIdx = parseInt(document.getElementById('map-diario-ref')?.value || '2', 10);
+        const conceptoIdx = parseInt(document.getElementById('map-diario-concepto')?.value || '3', 10);
+        const codigoIdx = parseInt(document.getElementById('map-diario-codigo')?.value || '4', 10);
+        const nombreIdx = parseInt(document.getElementById('map-diario-nombre')?.value || '5', 10);
+        const debeIdx = parseInt(document.getElementById('map-diario-debe')?.value || '7', 10);
+        const haberIdx = parseInt(document.getElementById('map-diario-haber')?.value || '8', 10);
+
+        const pucList = db.getPUC();
+        const pucMap = {};
+        pucList.forEach(a => { pucMap[a.codigo] = a; });
+
+        const entryGroups = {};
+        const newAccountsFound = {};
+        let runningNum = 1;
+        let lastAsientoKey = null;
+
+        excelImportDiario.parsedRows.forEach((row, rowIdx) => {
+          if (!row || !Array.isArray(row)) return;
+
+          let rawNum = String(row[numIdx] !== undefined ? row[numIdx] : '').trim();
+          let rawFecha = String(row[fechaIdx] !== undefined ? row[fechaIdx] : '').trim();
+          let rawRef = String(row[refIdx] !== undefined ? row[refIdx] : '').trim();
+          let rawConcepto = String(row[conceptoIdx] !== undefined ? row[conceptoIdx] : '').trim();
+          let rawCodigo = String(row[codigoIdx] !== undefined ? row[codigoIdx] : '').trim().replace(/\s+/g, '');
+          let rawNombre = String(row[nombreIdx] !== undefined ? row[nombreIdx] : '').trim();
+
+          let rawDebe = row[debeIdx];
+          let rawHaber = row[haberIdx];
+
+          const debe = Bs.round(Bs.parse(rawDebe));
+          const haber = Bs.round(Bs.parse(rawHaber));
+
+          if (!rawCodigo && debe === 0 && haber === 0) return;
+          if (!rawCodigo) rawCodigo = '1.1.01.01';
+
+          let fecha = rawFecha;
+          if (!fecha || fecha === '') {
+            fecha = new Date().toISOString().slice(0, 10);
+          } else if (/^\d+$/.test(fecha) && parseInt(fecha, 10) > 30000) {
+            const utcDays = parseInt(fecha, 10) - 25569;
+            const utcValue = utcDays * 86400;
+            const dateObj = new Date(utcValue * 1000);
+            fecha = dateObj.toISOString().slice(0, 10);
+          } else if (fecha.includes('/')) {
+            const parts = fecha.split('/');
+            if (parts.length === 3) {
+              if (parts[2].length === 4) {
+                fecha = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+              }
+            }
+          }
+
+          if (!pucMap[rawCodigo]) {
+            newAccountsFound[rawCodigo] = rawNombre || `Cuenta ${rawCodigo}`;
+          }
+
+          let entryKey = rawNum ? `num_${rawNum}` : (lastAsientoKey || `row_${rowIdx}`);
+          if (!rawNum && (rawFecha || rawRef || rawConcepto)) {
+            entryKey = `entry_${fecha}_${rawRef}_${rowIdx}`;
+            lastAsientoKey = entryKey;
+          }
+
+          if (!entryGroups[entryKey]) {
+            entryGroups[entryKey] = {
+              num: parseInt(rawNum, 10) || runningNum++,
+              fecha: fecha,
+              ref: rawRef,
+              concepto: rawConcepto || 'Asiento contable importado de Excel',
+              lines: []
+            };
+          }
+
+          entryGroups[entryKey].lines.push({
+            codigo: rawCodigo,
+            nombre: rawNombre || (pucMap[rawCodigo] ? pucMap[rawCodigo].nombre : `Cuenta ${rawCodigo}`),
+            detalle: rawConcepto || '',
+            debe: debe,
+            haber: haber
+          });
+        });
+
+        const validEntries = [];
+        let grandTotalDebe = 0;
+        let grandTotalHaber = 0;
+        let allBalanced = true;
+        const unbalancedEntries = [];
+
+        Object.keys(entryGroups).forEach(k => {
+          const entry = entryGroups[k];
+          if (!entry.lines || entry.lines.length === 0) return;
+
+          let entryDebe = 0;
+          let entryHaber = 0;
+          entry.lines.forEach(l => {
+            entryDebe += l.debe;
+            entryHaber += l.haber;
+          });
+
+          entryDebe = Bs.round(entryDebe);
+          entryHaber = Bs.round(entryHaber);
+          entry.totalDebe = entryDebe;
+          entry.totalHaber = entryHaber;
+
+          grandTotalDebe += entryDebe;
+          grandTotalHaber += entryHaber;
+
+          const diff = Math.abs(entryDebe - entryHaber);
+          if (diff > 0.01) {
+            allBalanced = false;
+            unbalancedEntries.push(`Asiento #${entry.num} (Dif: ${Bs.format(diff)})`);
+          }
+
+          validEntries.push(entry);
+        });
+
+        grandTotalDebe = Bs.round(grandTotalDebe);
+        grandTotalHaber = Bs.round(grandTotalHaber);
+
+        excelImportDiario.groupedEntries = validEntries;
+        excelImportDiario.newAccountsDetected = Object.keys(newAccountsFound).map(cod => ({
+          codigo: cod,
+          nombre: newAccountsFound[cod]
+        }));
+        excelImportDiario.totalDebe = grandTotalDebe;
+        excelImportDiario.totalHaber = grandTotalHaber;
+        excelImportDiario.isBalanced = allBalanced;
+
+        const countAsientosEl = document.getElementById('diario-prev-asientos-count');
+        const totalDebeEl = document.getElementById('diario-prev-total-debe');
+        const totalHaberEl = document.getElementById('diario-prev-total-haber');
+        const newAccountsEl = document.getElementById('diario-prev-new-accounts');
+
+        if (countAsientosEl) countAsientosEl.textContent = validEntries.length;
+        if (totalDebeEl) totalDebeEl.textContent = Bs.format(grandTotalDebe);
+        if (totalHaberEl) totalHaberEl.textContent = Bs.format(grandTotalHaber);
+        if (newAccountsEl) newAccountsEl.textContent = excelImportDiario.newAccountsDetected.length;
+
+        const alertBox = document.getElementById('diario-prev-balance-alert');
+        const alertMsg = document.getElementById('diario-prev-balance-msg');
+        const alertDiff = document.getElementById('diario-prev-balance-diff');
+        const alertIcon = document.getElementById('diario-prev-balance-icon');
+        const confirmBtn = document.getElementById('btn-confirm-import-diario');
+
+        const totalDiff = Bs.round(Math.abs(grandTotalDebe - grandTotalHaber));
+
+        if (validEntries.length > 0 && allBalanced && totalDiff === 0 && grandTotalDebe > 0) {
+          if (alertBox) alertBox.className = 'p-2.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-950/60 border-emerald-700 text-emerald-300';
+          if (alertMsg) alertMsg.textContent = `✓ Partida doble perfecta: Todos los asientos están balanceados (${validEntries.length} asientos).`;
+          if (alertDiff) alertDiff.textContent = 'Diferencia: Bs. 0,00';
+          if (alertIcon) alertIcon.setAttribute('data-lucide', 'check-circle-2');
+
+          if (confirmBtn) {
+            confirmBtn.removeAttribute('disabled');
+            confirmBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+          }
+        } else if (validEntries.length > 0 && !allBalanced) {
+          if (alertBox) alertBox.className = 'p-2.5 rounded-xl border text-xs flex items-center justify-between bg-rose-950/60 border-rose-700 text-rose-300';
+          if (alertMsg) alertMsg.textContent = `⚠ Descuadre en: ${unbalancedEntries.slice(0, 3).join(', ')}${unbalancedEntries.length > 3 ? '...' : ''}`;
+          if (alertDiff) alertDiff.textContent = `Diferencia Total: ${Bs.format(totalDiff)}`;
+          if (alertIcon) alertIcon.setAttribute('data-lucide', 'alert-triangle');
+
+          if (confirmBtn) {
+            confirmBtn.removeAttribute('disabled');
+            confirmBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+          }
+        } else {
+          if (alertBox) alertBox.className = 'p-2.5 rounded-xl border text-xs flex items-center justify-between bg-slate-900 border-slate-800 text-slate-400';
+          if (alertMsg) alertMsg.textContent = 'No se detectaron asientos válidos.';
+          if (alertDiff) alertDiff.textContent = '';
+          if (alertIcon) alertIcon.setAttribute('data-lucide', 'help-circle');
+
+          if (confirmBtn) {
+            confirmBtn.setAttribute('disabled', 'true');
+            confirmBtn.classList.add('opacity-40', 'cursor-not-allowed');
+          }
+        }
+
+        const tbody = document.getElementById('diario-preview-tbody');
+        const flatLines = [];
+        validEntries.slice(0, 8).forEach(entry => {
+          entry.lines.forEach(l => {
+            flatLines.push({
+              num: entry.num,
+              fecha: entry.fecha,
+              codigo: l.codigo,
+              nombre: l.nombre,
+              detalle: l.detalle || entry.concepto,
+              debe: l.debe,
+              haber: l.haber
+            });
+          });
+        });
+
+        if (tbody) {
+          if (flatLines.length > 0) {
+            tbody.innerHTML = flatLines.slice(0, 30).map(l => `
+              <tr class="hover:bg-slate-800/40">
+                <td class="py-1.5 px-3 font-mono font-medium text-brand-300">#${l.num}</td>
+                <td class="py-1.5 px-3 text-slate-300 font-mono text-[11px]">${l.fecha}</td>
+                <td class="py-1.5 px-3 text-slate-200"><span class="font-mono text-brand-400 mr-1">${l.codigo}</span> ${l.nombre}</td>
+                <td class="py-1.5 px-3 text-slate-400 text-[11px]">${l.detalle || '—'}</td>
+                <td class="py-1.5 px-3 text-right font-mono ${l.debe > 0 ? 'text-emerald-400 font-semibold' : 'text-slate-600'}">${l.debe > 0 ? Bs.format(l.debe) : '0,00'}</td>
+                <td class="py-1.5 px-3 text-right font-mono ${l.haber > 0 ? 'text-sky-400 font-semibold' : 'text-slate-600'}">${l.haber > 0 ? Bs.format(l.haber) : '0,00'}</td>
+              </tr>
+            `).join('');
+          } else {
+            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-500">Sin filas detectadas. Verifica las columnas en el mapeo superior.</td></tr>`;
+          }
+        }
+
+        lucide.createIcons();
+      },
+
+      executeImport: () => {
+        if (!excelImportDiario.groupedEntries || excelImportDiario.groupedEntries.length === 0) {
+          showToast('No se encontraron asientos válidos para importar.', 'warning');
+          return;
+        }
+
+        const mode = document.querySelector('input[name="diario-import-mode"]:checked')?.value || 'merge';
+        const autoCreateAccounts = document.getElementById('check-auto-create-accounts')?.checked ?? true;
+
+        if (autoCreateAccounts && excelImportDiario.newAccountsDetected.length > 0) {
+          const currentPUC = db.getPUC();
+          let createdCount = 0;
+          excelImportDiario.newAccountsDetected.forEach(acc => {
+            if (!currentPUC.some(a => a.codigo === acc.codigo)) {
+              let nat = 'D';
+              if (acc.codigo.startsWith('2') || acc.codigo.startsWith('3') || acc.codigo.startsWith('4')) {
+                nat = 'A';
+              }
+              const parts = acc.codigo.split('.').filter(p => p.length > 0);
+              const nivel = parts.length > 0 ? parts.length : 4;
+              currentPUC.push({
+                codigo: acc.codigo,
+                nombre: acc.nombre,
+                naturaleza: nat,
+                esMovimiento: true,
+                nivel: nivel
+              });
+              createdCount++;
+            }
+          });
+          if (createdCount > 0) {
+            db.savePUC(currentPUC);
+          }
+        }
+
+        let currentAsientos = db.getAsientos();
+        if (mode === 'replace') {
+          if (!confirm(`¿Estás seguro de reemplazar TODOS los asientos actuales por los ${excelImportDiario.groupedEntries.length} asientos del archivo Excel?`)) return;
+          currentAsientos = [];
+        }
+
+        const maxNum = currentAsientos.length > 0 ? Math.max(...currentAsientos.map(e => e.num || 0)) : 0;
+        let counter = maxNum + 1;
+
+        excelImportDiario.groupedEntries.forEach((entry, idx) => {
+          const newEntry = {
+            id: Date.now() + idx + Math.floor(Math.random() * 1000),
+            num: mode === 'replace' ? entry.num : (entry.num > maxNum ? entry.num : counter++),
+            fecha: entry.fecha,
+            ref: entry.ref,
+            concepto: entry.concepto,
+            lines: entry.lines,
+            totalDebe: entry.totalDebe,
+            totalHaber: entry.totalHaber
+          };
+          currentAsientos.push(newEntry);
+        });
+
+        db.saveAsientos(currentAsientos);
+        excelImportDiario.closeModal();
+
+        puc.renderList();
+        asientos.renderList();
+        mayor.populateAccountSelect();
+        mayor.renderSelectedAccount();
+        balanceComprobacion.render();
+
+        showToast(`¡Importación exitosa! Se cargaron ${excelImportDiario.groupedEntries.length} asientos contables a la base de datos.`, 'success');
+      }
+    };
+
+    /**
+     * MODULE: EXCEL IMPORT FOR LIBRO MAYOR
+     */
+    const excelImportMayor = {
+      openModal: () => {
+        document.getElementById('modal-import-mayor').classList.remove('hidden');
+        lucide.createIcons();
+      },
+
+      closeModal: () => {
+        document.getElementById('modal-import-mayor').classList.add('hidden');
+      },
+
+      launchAccountImport: () => {
+        excelImportMayor.closeModal();
+        excelImport.openModal();
+      },
+
+      launchDiarioImport: () => {
+        excelImportMayor.closeModal();
+        excelImportDiario.openModal('asientos');
+      }
+    };
+
+    /**
      * MODULE: LIBRO DIARIO GENERAL (ASIENTOS)
      */
     const asientos = {
@@ -2791,6 +3788,43 @@
         link.click();
         link.remove();
         showToast('Libro Diario exportado en CSV.', 'success');
+      },
+
+      exportDiarioExcel: () => {
+        const list = db.getAsientos();
+        const rows = [
+          ['SISTEMA CONTABLE EN BOLÍVARES (VES) - LIBRO DIARIO GENERAL'],
+          ['Fecha de Exportación:', new Date().toLocaleString()],
+          [],
+          ['Asiento #', 'Fecha', 'Referencia', 'Concepto General', 'Código Cuenta', 'Nombre Cuenta', 'Detalle Línea', 'Debe (Bs.)', 'Haber (Bs.)']
+        ];
+        
+        list.forEach(e => {
+          (e.lines || []).forEach(l => {
+            rows.push([
+              e.num,
+              e.fecha,
+              e.ref || '',
+              e.concepto || '',
+              l.codigo,
+              l.nombre || '',
+              l.detalle || '',
+              l.debe || 0,
+              l.haber || 0
+            ]);
+          });
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [
+          { wch: 10 }, { wch: 12 }, { wch: 14 }, { wch: 34 },
+          { wch: 16 }, { wch: 30 }, { wch: 25 }, { wch: 18 }, { wch: 18 }
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Libro_Diario');
+        XLSX.writeFile(wb, `Libro_Diario_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showToast('Libro Diario exportado a Excel exitosamente.', 'success');
       }
     };
 
