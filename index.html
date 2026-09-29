@@ -389,6 +389,11 @@
             <i data-lucide="printer" class="w-4 h-4 text-slate-400"></i>
             <span>Imprimir</span>
           </button>
+          <!-- Balance de Apertura Shortcut for Diario -->
+          <button onclick="saldosIniciales.openModal()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-950/60 text-amber-300 border border-amber-700/80 hover:bg-amber-900/60 transition shadow-sm" title="Registrar Balance de Apertura (Saldos Iniciales)">
+            <i data-lucide="scale" class="w-4 h-4 text-amber-400"></i>
+            <span>Balance de Apertura</span>
+          </button>
           <button onclick="asientos.openNewModal()" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white shadow-md shadow-brand-900/40 transition">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Registrar Asiento</span>
@@ -1406,90 +1411,248 @@
   </div>
 
   <!-- ======================================================= -->
-  <!-- MODAL 4: ASISTENTE DE SALDOS INICIALES (APERTURA)       -->
+  <!-- MODAL 4: BALANCE DE APERTURA (REGLA CONTABLE Y SALDOS)  -->
   <!-- ======================================================= -->
   <div id="modal-saldos-iniciales" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[94vh]">
       
+      <!-- Modal Header -->
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
         <div>
           <h3 class="font-bold text-white text-base sm:text-lg flex items-center space-x-2">
-            <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
-            <span>Asistente de Saldos Iniciales (Asiento de Apertura)</span>
+            <i data-lucide="scale" class="w-5 h-5 text-amber-400"></i>
+            <span>Balance de Apertura (Asiento Inicial del Periodo)</span>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-brand-950 text-brand-300 border border-brand-800">VEN-NIF</span>
           </h3>
-          <p class="text-xs text-slate-400">Carga los saldos finales de las cuentas reales (Activo, Pasivo y Patrimonio) del periodo anterior.</p>
+          <p class="text-xs text-slate-400">Constitución patrimonial e inicio del ejercicio contable mediante la ecuación fundamental.</p>
         </div>
         <button onclick="saldosIniciales.closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-sm">✕</button>
       </div>
 
       <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 text-xs">
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-          <div>
-            <label class="block font-semibold text-slate-300 mb-1">Fecha de Apertura *</label>
-            <input type="date" id="apertura-fecha" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none">
+        <!-- ============================================== -->
+        <!-- REGLA CONTABLE DE APERTURA (PANEL PEDAGÓGICO)  -->
+        <!-- ============================================== -->
+        <div class="bg-gradient-to-r from-slate-950 via-brand-950/30 to-slate-950 p-4 rounded-2xl border-2 border-brand-700/60 shadow-lg space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-800/40 pb-2.5">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-brand-800/80 border border-brand-500/50 flex items-center justify-center text-brand-200">
+                <i data-lucide="book-marked" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h4 class="font-bold text-sm text-white tracking-wide">REGLA CONTABLE DE APERTURA</h4>
+                <p class="text-[11px] text-brand-300 font-mono">Ecuación Patrimonial Fundamental • Partida Doble</p>
+              </div>
+            </div>
+            <!-- Central Formula Badge -->
+            <div class="px-3.5 py-1.5 rounded-xl bg-slate-950 border border-brand-600/70 shadow text-center">
+              <span class="font-mono font-extrabold text-xs sm:text-sm text-brand-300 tracking-wider">
+                ACTIVO = PASIVO + PATRIMONIO
+              </span>
+            </div>
           </div>
-          <div>
-            <label class="block font-semibold text-slate-300 mb-1">Referencia del Comprobante</label>
-            <input type="text" id="apertura-ref" value="APERTURA-001" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none">
+
+          <!-- Explanation of the 3 Real Account Classes -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-[11px]">
+            <!-- 1. Activo Rule -->
+            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-emerald-900/60 flex items-start space-x-2">
+              <span class="w-5 h-5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+              <div>
+                <span class="font-bold text-emerald-300 block">1. Cuentas de ACTIVO (Debe)</span>
+                <p class="text-slate-400 leading-snug mt-0.5">Naturaleza <strong>Deudora</strong>. En el asiento de apertura se registran en el <strong>DEBE</strong> (bienes, efectivo, bancos, inventarios y derechos).</p>
+              </div>
+            </div>
+
+            <!-- 2. Pasivo Rule -->
+            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-rose-900/60 flex items-start space-x-2">
+              <span class="w-5 h-5 rounded-full bg-rose-950 border border-rose-700 text-rose-400 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+              <div>
+                <span class="font-bold text-rose-300 block">2. Cuentas de PASIVO (Haber)</span>
+                <p class="text-slate-400 leading-snug mt-0.5">Naturaleza <strong>Acreedora</strong>. En el asiento de apertura se registran en el <strong>HABER</strong> (deudas con proveedores, préstamos y obligaciones).</p>
+              </div>
+            </div>
+
+            <!-- 3. Patrimonio Rule -->
+            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-sky-900/60 flex items-start space-x-2">
+              <span class="w-5 h-5 rounded-full bg-sky-950 border border-sky-700 text-sky-400 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+              <div>
+                <span class="font-bold text-sky-300 block">3. PATRIMONIO y Utilidad Acumulada</span>
+                <p class="text-slate-400 leading-snug mt-0.5">Naturaleza <strong>Acreedora</strong>. Se registra en el <strong>HABER</strong> (Capital Social aportado y <strong>Utilidades Retenidas / Acumuladas</strong> anteriores).</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Accounts Grid with inputs -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-300">Cuentas Reales de Movimiento (Activos, Pasivos y Patrimonio)</span>
-            <button onclick="saldosIniciales.autoBalanceCapital()" class="text-[11px] text-amber-400 hover:text-amber-300 underline">
-              Calcular diferencia en Capital Social
-            </button>
+        <!-- Date & Reference Inputs -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+          <div class="sm:col-span-3">
+            <label class="block font-semibold text-slate-300 mb-1">Fecha de Apertura *</label>
+            <input type="date" id="apertura-fecha" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500 font-mono">
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block font-semibold text-slate-300 mb-1">Doc / Referencia</label>
+            <input type="text" id="apertura-ref" value="APERTURA-001" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-brand-500">
+          </div>
+          <div class="sm:col-span-6">
+            <label class="block font-semibold text-slate-300 mb-1">Concepto General del Asiento</label>
+            <input type="text" id="apertura-concepto" value="Asiento de Apertura - Registro de Saldos Iniciales del Periodo (Balance de Apertura)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- CLASIFICACIÓN DE CUENTAS REALES: 1, 2, 3       -->
+        <!-- ============================================== -->
+        <div class="space-y-3">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span class="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center space-x-1.5">
+              <i data-lucide="layers" class="w-4 h-4 text-brand-400"></i>
+              <span>Clasificación de Cuentas Reales:</span>
+            </span>
+            <div class="flex items-center space-x-2">
+              <span id="apertura-current-group-label" class="text-[11px] font-mono text-brand-300 font-medium">Mostrando: 1. Activo</span>
+            </div>
           </div>
 
+          <!-- The 3 Interactive Class Tabs: 1. Activo, 2. Pasivo, 3. Patrimonio con la Utilidad Acumulada -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            
+            <!-- TAB 1: ACTIVO -->
+            <button type="button" id="apertura-tab-btn-1" onclick="saldosIniciales.setClassFilter('1')" class="apertura-tab-btn p-3 rounded-2xl border transition-all text-left flex items-center justify-between bg-brand-600 border-brand-500 text-white shadow-md">
+              <div class="flex items-center space-x-2.5">
+                <span class="w-7 h-7 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center font-extrabold text-sm">1</span>
+                <div>
+                  <span class="font-bold text-xs block">1. ACTIVO</span>
+                  <span class="text-[10px] opacity-80">Débito (Debe)</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span id="tab-badge-debe-1" class="font-mono font-bold text-xs block">Bs. 0,00</span>
+                <span id="tab-count-1" class="text-[10px] opacity-80">0 ctas</span>
+              </div>
+            </button>
+
+            <!-- TAB 2: PASIVO -->
+            <button type="button" id="apertura-tab-btn-2" onclick="saldosIniciales.setClassFilter('2')" class="apertura-tab-btn p-3 rounded-2xl border transition-all text-left flex items-center justify-between bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700">
+              <div class="flex items-center space-x-2.5">
+                <span class="w-7 h-7 rounded-xl bg-slate-900 border border-slate-700 text-rose-400 flex items-center justify-center font-extrabold text-sm">2</span>
+                <div>
+                  <span class="font-bold text-xs block text-white">2. PASIVO</span>
+                  <span class="text-[10px] text-slate-400">Crédito (Haber)</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span id="tab-badge-haber-2" class="font-mono font-bold text-xs block text-rose-400">Bs. 0,00</span>
+                <span id="tab-count-2" class="text-[10px] text-slate-400">0 ctas</span>
+              </div>
+            </button>
+
+            <!-- TAB 3: PATRIMONIO CON UTILIDAD ACUMULADA -->
+            <button type="button" id="apertura-tab-btn-3" onclick="saldosIniciales.setClassFilter('3')" class="apertura-tab-btn p-3 rounded-2xl border transition-all text-left flex items-center justify-between bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700">
+              <div class="flex items-center space-x-2.5">
+                <span class="w-7 h-7 rounded-xl bg-slate-900 border border-slate-700 text-sky-400 flex items-center justify-center font-extrabold text-sm">3</span>
+                <div>
+                  <span class="font-bold text-xs block text-white">3. PATRIMONIO</span>
+                  <span class="text-[10px] text-sky-300">Con Utilidad Acumulada</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span id="tab-badge-haber-3" class="font-mono font-bold text-xs block text-sky-400">Bs. 0,00</span>
+                <span id="tab-count-3" class="text-[10px] text-slate-400">0 ctas</span>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- Contextual Action Bar for Selected Class -->
+          <div class="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-950/70 border border-slate-800/80">
+            <div id="apertura-class-guidance" class="text-[11px] text-slate-400 flex items-center space-x-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span id="apertura-guidance-text">Ingresa los saldos de tus cuentas de Activo. Se registrarán al DEBE.</span>
+            </div>
+            
+            <!-- Quick Balance Shortcuts -->
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="saldosIniciales.autoBalanceUtilidadAcumulada()" title="Calcula la diferencia restante y la asigna a Utilidades Acumuladas" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-sky-950/80 text-sky-300 border border-sky-800 hover:bg-sky-900 transition flex items-center space-x-1">
+                <i data-lucide="sparkles" class="w-3 h-3 text-sky-400"></i>
+                <span>Cuadrar en Utilidad Acumulada</span>
+              </button>
+              <button type="button" onclick="saldosIniciales.autoBalanceCapital()" title="Calcula la diferencia restante y la asigna a Capital Social" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-950/80 text-amber-300 border border-amber-800 hover:bg-amber-900 transition flex items-center space-x-1">
+                <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+                <span>Cuadrar en Capital Social</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Accounts Table -->
           <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 max-h-72">
             <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase sticky top-0">
+              <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase sticky top-0 border-b border-slate-800">
                 <tr>
                   <th class="py-2.5 px-3">Código</th>
                   <th class="py-2.5 px-3">Nombre de Cuenta</th>
                   <th class="py-2.5 px-2 text-center">Naturaleza</th>
+                  <th class="py-2.5 px-2 text-center">Imputación Apertura</th>
                   <th class="py-2.5 px-3 text-right">Saldo Inicial (Bs.)</th>
                 </tr>
               </thead>
-              <tbody id="saldos-iniciales-tbody" class="divide-y divide-slate-800/80">
-                <!-- Dynamically populated with input rows -->
+              <tbody id="saldos-iniciales-tbody" class="divide-y divide-slate-800/80 tabular-nums">
+                <!-- Dynamically populated according to active class tab (1, 2 or 3) -->
               </tbody>
             </table>
           </div>
+
         </div>
 
-        <!-- Balance Equality Verification Box -->
+        <!-- ============================================== -->
+        <!-- VERIFICACIÓN EN TIEMPO REAL DE LA ECUACIÓN     -->
+        <!-- ============================================== -->
         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-              <span class="text-[11px] text-slate-400 block">Total Activos (Debe)</span>
-              <span id="apertura-total-debe" class="font-mono font-bold text-sm text-emerald-400">Bs. 0,00</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+            
+            <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[10px] uppercase text-emerald-400 block font-semibold">1. Total Activo (Debe)</span>
+              <span id="apertura-total-debe" class="font-mono font-bold text-sm text-emerald-300">Bs. 0,00</span>
             </div>
-            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-              <span class="text-[11px] text-slate-400 block">Total Pasivo + Patr. (Haber)</span>
-              <span id="apertura-total-haber" class="font-mono font-bold text-sm text-sky-400">Bs. 0,00</span>
+
+            <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[10px] uppercase text-rose-400 block font-semibold">2. Total Pasivo (Haber)</span>
+              <span id="apertura-subtotal-pasivo" class="font-mono font-bold text-sm text-rose-300">Bs. 0,00</span>
             </div>
-            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-              <span class="text-[11px] text-slate-400 block">Diferencia de Cuadratura</span>
-              <span id="apertura-diferencia" class="font-mono font-bold text-sm text-slate-300">Bs. 0,00</span>
+
+            <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[10px] uppercase text-sky-400 block font-semibold">3. Patrimonio + Utilidad (Haber)</span>
+              <span id="apertura-subtotal-patrimonio" class="font-mono font-bold text-sm text-sky-300">Bs. 0,00</span>
             </div>
+
+            <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[10px] uppercase text-brand-400 block font-semibold">Total Pasivo + Patr.</span>
+              <span id="apertura-total-haber" class="font-mono font-bold text-sm text-brand-300">Bs. 0,00</span>
+            </div>
+
           </div>
-          <div id="apertura-status-badge" class="text-center font-semibold py-1.5 px-3 rounded-xl bg-amber-950/40 text-amber-300 border border-amber-800/50">
-            Los saldos deben estar perfectamente cuadrados antes de generar el asiento.
+
+          <!-- Dynamic Equation Status Badge -->
+          <div id="apertura-status-badge" class="p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-amber-950/40 text-amber-300 border-amber-800/60">
+            <div class="flex items-center space-x-2">
+              <i id="apertura-status-icon" data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+              <span id="apertura-status-text">Ingresa los saldos en 1. Activo, 2. Pasivo y 3. Patrimonio. Debe y Haber deben ser exactamente iguales.</span>
+            </div>
+            <span id="apertura-diferencia" class="font-mono font-bold text-sm">Dif: Bs. 0,00</span>
           </div>
         </div>
 
       </div>
 
+      <!-- Modal Footer -->
       <div class="px-5 py-3 border-t border-slate-800 flex items-center justify-end space-x-2 bg-slate-950">
         <button onclick="saldosIniciales.closeModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-slate-800 transition">
           Cancelar
         </button>
-        <button id="btn-generar-apertura" onclick="saldosIniciales.generateEntry()" disabled class="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500 text-white shadow-md transition">
-          Generar Asiento de Apertura
+        <button id="btn-generar-apertura" onclick="saldosIniciales.generateEntry()" disabled class="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500 text-white shadow-md transition flex items-center space-x-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Generar Asiento de Apertura</span>
         </button>
       </div>
 
@@ -4322,136 +4485,374 @@
      * MODULE: ASISTENTE DE SALDOS INICIALES (OPENING BALANCES)
      */
     const saldosIniciales = {
+      activeClass: '1', // '1' = Activo, '2' = Pasivo, '3' = Patrimonio
+      inputValues: {},  // Map of codigo -> numeric value
+
       openModal: () => {
-        const pucList = db.getPUC();
-        // Filter to real movement accounts (Clases 1, 2, 3)
-        const realAccounts = pucList.filter(a => a.esMovimiento && (a.codigo.startsWith('1') || a.codigo.startsWith('2') || a.codigo.startsWith('3')));
-        realAccounts.sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
+        // Ensure standard equity accounts exist (Capital Social 3.1.01 and Utilidad Acumulada 3.3.01)
+        saldosIniciales.ensurePatrimonioAccounts();
 
         document.getElementById('apertura-fecha').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('apertura-ref').value = 'APERTURA-001';
+        document.getElementById('apertura-concepto').value = 'Asiento de Apertura - Registro de Saldos Iniciales del Periodo (Balance de Apertura)';
+        
+        // Load initial values from existing opening entry if available, or keep memory
+        const existingApertura = db.getAsientos().find(e => e.ref && e.ref.includes('APERTURA'));
+        if (existingApertura && Object.keys(saldosIniciales.inputValues).length === 0) {
+          (existingApertura.lines || []).forEach(l => {
+            saldosIniciales.inputValues[l.codigo] = l.debe > 0 ? l.debe : l.haber;
+          });
+        }
+
+        saldosIniciales.activeClass = '1';
         document.getElementById('modal-saldos-iniciales').classList.remove('hidden');
-
-        const tbody = document.getElementById('saldos-iniciales-tbody');
-        tbody.innerHTML = realAccounts.map(acc => `
-          <tr class="hover:bg-slate-800/40">
-            <td class="py-2 px-3 font-mono font-medium text-brand-300">${acc.codigo}</td>
-            <td class="py-2 px-3 text-slate-200">${acc.nombre}</td>
-            <td class="py-2 px-2 text-center">
-              <span class="text-[10px] px-2 py-0.5 rounded font-mono ${acc.naturaleza === 'D' ? 'bg-emerald-950 text-emerald-300' : 'bg-sky-950 text-sky-300'}">
-                ${acc.naturaleza === 'D' ? 'Deudora' : 'Acreedora'}
-              </span>
-            </td>
-            <td class="py-2 px-3 text-right">
-              <input type="text" data-codigo="${acc.codigo}" data-naturaleza="${acc.naturaleza}" data-nombre="${acc.nombre}" placeholder="0,00" oninput="saldosIniciales.updateTotals()" class="saldos-input w-36 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-right font-mono text-white focus:outline-none focus:border-brand-500">
-            </td>
-          </tr>
-        `).join('');
-
+        saldosIniciales.updateClassTabsUI();
+        saldosIniciales.renderTable();
         saldosIniciales.updateTotals();
+        lucide.createIcons();
       },
 
       closeModal: () => {
         document.getElementById('modal-saldos-iniciales').classList.add('hidden');
       },
 
-      updateTotals: () => {
-        const inputs = document.querySelectorAll('.saldos-input');
-        let totalDebe = 0;
-        let totalHaber = 0;
+      ensurePatrimonioAccounts: () => {
+        const pucList = db.getPUC();
+        let changed = false;
 
-        inputs.forEach(inp => {
-          const val = Bs.parse(inp.value);
-          const nat = inp.getAttribute('data-naturaleza');
+        // Ensure 3.1.01 Capital Social
+        if (!pucList.some(a => a.codigo === '3.1.01')) {
+          pucList.push({
+            codigo: '3.1.01',
+            nombre: 'Capital Social Suscrito y Pagado',
+            nivel: 3,
+            naturaleza: 'A',
+            esMovimiento: true
+          });
+          changed = true;
+        }
+
+        // Ensure 3.3.01 Utilidades Retenidas / Acumuladas
+        if (!pucList.some(a => a.codigo === '3.3.01')) {
+          pucList.push({
+            codigo: '3.3.01',
+            nombre: 'Utilidades Retenidas de Ejercicios Anteriores (Utilidad Acumulada)',
+            nivel: 3,
+            naturaleza: 'A',
+            esMovimiento: true
+          });
+          changed = true;
+        }
+
+        if (changed) {
+          pucList.sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
+          db.savePUC(pucList);
+        }
+      },
+
+      setClassFilter: (cls) => {
+        saldosIniciales.activeClass = cls;
+        saldosIniciales.updateClassTabsUI();
+        saldosIniciales.renderTable();
+        lucide.createIcons();
+      },
+
+      updateClassTabsUI: () => {
+        const tab1 = document.getElementById('apertura-tab-btn-1');
+        const tab2 = document.getElementById('apertura-tab-btn-2');
+        const tab3 = document.getElementById('apertura-tab-btn-3');
+        const groupLabel = document.getElementById('apertura-current-group-label');
+        const guidanceText = document.getElementById('apertura-guidance-text');
+
+        const activeClsStyle = 'apertura-tab-btn p-3 rounded-2xl border transition-all text-left flex items-center justify-between bg-brand-600 border-brand-500 text-white shadow-md transform scale-[1.01]';
+        const inactiveClsStyle = 'apertura-tab-btn p-3 rounded-2xl border transition-all text-left flex items-center justify-between bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700';
+
+        if (tab1) tab1.className = saldosIniciales.activeClass === '1' ? activeClsStyle : inactiveClsStyle;
+        if (tab2) tab2.className = saldosIniciales.activeClass === '2' ? activeClsStyle : inactiveClsStyle;
+        if (tab3) tab3.className = saldosIniciales.activeClass === '3' ? activeClsStyle : inactiveClsStyle;
+
+        if (saldosIniciales.activeClass === '1') {
+          if (groupLabel) groupLabel.textContent = 'Mostrando: 1. Activo (Naturaleza Deudora • DEBE)';
+          if (guidanceText) guidanceText.textContent = 'Ingresa los saldos de tus cuentas de Activo (Caja, Bancos, Inventarios, Mobiliario). Se imputarán al DEBE.';
+        } else if (saldosIniciales.activeClass === '2') {
+          if (groupLabel) groupLabel.textContent = 'Mostrando: 2. Pasivo (Naturaleza Acreedora • HABER)';
+          if (guidanceText) guidanceText.textContent = 'Ingresa los saldos de tus cuentas de Pasivo (Proveedores, Cuentas por pagar, Obligaciones). Se imputarán al HABER.';
+        } else {
+          if (groupLabel) groupLabel.textContent = 'Mostrando: 3. Patrimonio con Utilidad Acumulada (HABER)';
+          if (guidanceText) guidanceText.textContent = 'Ingresa el Capital Social y la Utilidad Acumulada (Utilidades Retenidas). Se imputarán al HABER.';
+        }
+      },
+
+      renderTable: () => {
+        const pucList = db.getPUC();
+        const tbody = document.getElementById('saldos-iniciales-tbody');
+        if (!tbody) return;
+
+        const accounts = pucList.filter(a => a.esMovimiento && a.codigo.startsWith(saldosIniciales.activeClass));
+        accounts.sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
+
+        if (accounts.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No hay cuentas imputables en esta clase. Registra subcuentas en el Catálogo PUC.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = accounts.map(acc => {
+          const val = saldosIniciales.inputValues[acc.codigo] || 0;
+          const displayVal = val > 0 ? Bs.format(val).replace('Bs. ', '') : '';
+          const isUtilidad = acc.codigo.startsWith('3.3') || acc.nombre.toLowerCase().includes('utilidad') || acc.nombre.toLowerCase().includes('retenid');
+          const isCapital = acc.codigo.startsWith('3.1') || acc.nombre.toLowerCase().includes('capital social');
+
+          const natureBadge = acc.naturaleza === 'D'
+            ? `<span class="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-950 text-emerald-300 border border-emerald-800">Deudora</span>`
+            : `<span class="text-[10px] px-2 py-0.5 rounded font-mono bg-sky-950 text-sky-300 border border-sky-800">Acreedora</span>`;
+
+          const imputacionText = acc.naturaleza === 'D'
+            ? `<span class="font-bold text-emerald-400 font-mono text-[11px]">DEBE</span>`
+            : `<span class="font-bold text-sky-400 font-mono text-[11px]">HABER</span>`;
+
+          let specialTag = '';
+          if (isUtilidad) {
+            specialTag = `<span class="ml-1.5 px-1.5 py-0.5 rounded text-[9px] bg-sky-950 text-sky-300 border border-sky-700 font-semibold uppercase">Utilidad Acumulada</span>`;
+          } else if (isCapital) {
+            specialTag = `<span class="ml-1.5 px-1.5 py-0.5 rounded text-[9px] bg-amber-950 text-amber-300 border border-amber-700 font-semibold uppercase">Capital Social</span>`;
+          }
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition-colors ${isUtilidad ? 'bg-sky-950/20' : (isCapital ? 'bg-amber-950/20' : '')}">
+              <td class="py-2.5 px-3 font-mono font-medium text-brand-300">${acc.codigo}</td>
+              <td class="py-2.5 px-3 text-slate-200">
+                <div class="flex items-center flex-wrap">
+                  <span class="font-medium">${acc.nombre}</span>
+                  ${specialTag}
+                </div>
+              </td>
+              <td class="py-2.5 px-2 text-center">${natureBadge}</td>
+              <td class="py-2.5 px-2 text-center">${imputacionText}</td>
+              <td class="py-2.5 px-3 text-right">
+                <input type="text"
+                  id="saldo-input-${acc.codigo.replace(/\./g, '_')}"
+                  value="${displayVal}"
+                  placeholder="0,00"
+                  oninput="saldosIniciales.onSaldoChange('${acc.codigo}', this.value)"
+                  class="saldos-input w-36 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-right font-mono text-white focus:outline-none focus:border-brand-500 shadow-inner">
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      onSaldoChange: (codigo, rawVal) => {
+        const val = Bs.parse(rawVal);
+        if (val > 0) {
+          saldosIniciales.inputValues[codigo] = val;
+        } else {
+          delete saldosIniciales.inputValues[codigo];
+        }
+        saldosIniciales.updateTotals();
+      },
+
+      updateTotals: () => {
+        const pucList = db.getPUC();
+        const pucMap = {};
+        pucList.forEach(a => { pucMap[a.codigo] = a; });
+
+        let totalActivo = 0;    // Clase 1 (Debe)
+        let totalPasivo = 0;    // Clase 2 (Haber)
+        let totalPatrimonio = 0; // Clase 3 (Haber)
+        let count1 = 0;
+        let count2 = 0;
+        let count3 = 0;
+
+        Object.keys(saldosIniciales.inputValues).forEach(cod => {
+          const val = saldosIniciales.inputValues[cod] || 0;
           if (val > 0) {
-            if (nat === 'D') {
-              totalDebe += val;
-            } else {
-              totalHaber += val;
+            if (cod.startsWith('1')) {
+              totalActivo += val;
+              count1++;
+            } else if (cod.startsWith('2')) {
+              totalPasivo += val;
+              count2++;
+            } else if (cod.startsWith('3')) {
+              totalPatrimonio += val;
+              count3++;
             }
           }
         });
 
-        totalDebe = Bs.round(totalDebe);
-        totalHaber = Bs.round(totalHaber);
-        const diff = Bs.round(Math.abs(totalDebe - totalHaber));
+        totalActivo = Bs.round(totalActivo);
+        totalPasivo = Bs.round(totalPasivo);
+        totalPatrimonio = Bs.round(totalPatrimonio);
+        const totalHaber = Bs.round(totalPasivo + totalPatrimonio);
+        const diff = Bs.round(Math.abs(totalActivo - totalHaber));
 
-        document.getElementById('apertura-total-debe').textContent = Bs.format(totalDebe);
-        document.getElementById('apertura-total-haber').textContent = Bs.format(totalHaber);
-        document.getElementById('apertura-diferencia').textContent = Bs.format(diff);
+        // Update tabs mini totals
+        const bDebe1 = document.getElementById('tab-badge-debe-1');
+        const bHaber2 = document.getElementById('tab-badge-haber-2');
+        const bHaber3 = document.getElementById('tab-badge-haber-3');
+        const c1 = document.getElementById('tab-count-1');
+        const c2 = document.getElementById('tab-count-2');
+        const c3 = document.getElementById('tab-count-3');
 
+        if (bDebe1) bDebe1.textContent = Bs.format(totalActivo);
+        if (bHaber2) bHaber2.textContent = Bs.format(totalPasivo);
+        if (bHaber3) bHaber3.textContent = Bs.format(totalPatrimonio);
+        if (c1) c1.textContent = `${count1} con saldo`;
+        if (c2) c2.textContent = `${count2} con saldo`;
+        if (c3) c3.textContent = `${count3} con saldo`;
+
+        // Update summary cards
+        const elTotalDebe = document.getElementById('apertura-total-debe');
+        const elSubPasivo = document.getElementById('apertura-subtotal-pasivo');
+        const elSubPatr = document.getElementById('apertura-subtotal-patrimonio');
+        const elTotalHaber = document.getElementById('apertura-total-haber');
+        const elDiff = document.getElementById('apertura-diferencia');
+
+        if (elTotalDebe) elTotalDebe.textContent = Bs.format(totalActivo);
+        if (elSubPasivo) elSubPasivo.textContent = Bs.format(totalPasivo);
+        if (elSubPatr) elSubPatr.textContent = Bs.format(totalPatrimonio);
+        if (elTotalHaber) elTotalHaber.textContent = Bs.format(totalHaber);
+        if (elDiff) elDiff.textContent = `Dif: ${Bs.format(diff)}`;
+
+        // Update status alert badge
         const badge = document.getElementById('apertura-status-badge');
+        const text = document.getElementById('apertura-status-text');
+        const icon = document.getElementById('apertura-status-icon');
         const btn = document.getElementById('btn-generar-apertura');
 
-        if (totalDebe === 0 && totalHaber === 0) {
-          badge.className = 'text-center font-semibold py-1.5 px-3 rounded-xl bg-amber-950/40 text-amber-300 border border-amber-800/50';
-          badge.textContent = 'Ingrese los saldos iniciales de las cuentas.';
-          btn.setAttribute('disabled', 'true');
-        } else if (diff === 0 && totalDebe > 0) {
-          badge.className = 'text-center font-semibold py-1.5 px-3 rounded-xl bg-emerald-950/60 text-emerald-300 border border-emerald-700/60';
-          badge.textContent = '✓ ¡Saldos Cuadrados! Listo para generar el Asiento de Apertura.';
-          btn.removeAttribute('disabled');
+        if (totalActivo === 0 && totalHaber === 0) {
+          if (badge) badge.className = 'p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-amber-950/40 text-amber-300 border-amber-800/60';
+          if (text) text.textContent = 'Ingresa los saldos en 1. Activo, 2. Pasivo y 3. Patrimonio. Recuerda que Activo debe ser igual a Pasivo + Patrimonio.';
+          if (icon) icon.setAttribute('data-lucide', 'alert-triangle');
+          if (btn) btn.setAttribute('disabled', 'true');
+        } else if (diff === 0 && totalActivo > 0) {
+          if (badge) badge.className = 'p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-emerald-950/60 text-emerald-300 border-emerald-700/70 shadow-md';
+          if (text) text.textContent = `✓ Regla Contable Cumplida: Activo (${Bs.format(totalActivo)}) = Pasivo (${Bs.format(totalPasivo)}) + Patrimonio (${Bs.format(totalPatrimonio)}).`;
+          if (icon) icon.setAttribute('data-lucide', 'check-circle-2');
+          if (btn) btn.removeAttribute('disabled');
         } else {
-          badge.className = 'text-center font-semibold py-1.5 px-3 rounded-xl bg-rose-950/60 text-rose-300 border border-rose-700/60';
-          badge.textContent = `Diferencia de Cuadratura: ${Bs.format(diff)}. Debe y Haber deben coincidir.`;
-          btn.setAttribute('disabled', 'true');
+          if (badge) badge.className = 'p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-rose-950/60 text-rose-300 border-rose-700/70';
+          if (text) text.textContent = `⚠ Descuadre en Regla de Apertura: Activo (${Bs.format(totalActivo)}) ≠ Pasivo + Patrimonio (${Bs.format(totalHaber)}). Diferencia: ${Bs.format(diff)}.`;
+          if (icon) icon.setAttribute('data-lucide', 'alert-circle');
+          if (btn) btn.setAttribute('disabled', 'true');
         }
+
+        lucide.createIcons();
+      },
+
+      autoBalanceUtilidadAcumulada: () => {
+        let totalActivo = 0;
+        let totalPasivo = 0;
+        let totalPatrimonioSinUtilidad = 0;
+
+        const pucList = db.getPUC();
+        let utilidadAccount = pucList.find(a => a.esMovimiento && (a.codigo === '3.3.01' || a.nombre.toLowerCase().includes('utilidad')));
+        if (!utilidadAccount) {
+          saldosIniciales.ensurePatrimonioAccounts();
+          utilidadAccount = db.getPUC().find(a => a.codigo === '3.3.01');
+        }
+
+        Object.keys(saldosIniciales.inputValues).forEach(cod => {
+          if (utilidadAccount && cod === utilidadAccount.codigo) return;
+          const val = saldosIniciales.inputValues[cod] || 0;
+          if (cod.startsWith('1')) totalActivo += val;
+          else if (cod.startsWith('2')) totalPasivo += val;
+          else if (cod.startsWith('3')) totalPatrimonioSinUtilidad += val;
+        });
+
+        const requiredUtilidad = Bs.round(totalActivo - totalPasivo - totalPatrimonioSinUtilidad);
+
+        if (requiredUtilidad <= 0) {
+          showToast('El Pasivo y Capital superan a los Activos. Revisa los saldos ingresados.', 'warning');
+          return;
+        }
+
+        saldosIniciales.inputValues[utilidadAccount.codigo] = requiredUtilidad;
+
+        saldosIniciales.setClassFilter('3');
+        saldosIniciales.updateTotals();
+        showToast(`Diferencia de ${Bs.format(requiredUtilidad)} asignada a Utilidades Acumuladas.`, 'success');
       },
 
       autoBalanceCapital: () => {
-        const inputs = document.querySelectorAll('.saldos-input');
-        let totalDebe = 0;
-        let totalHaber = 0;
+        let totalActivo = 0;
+        let totalPasivo = 0;
+        let totalPatrimonioSinCapital = 0;
 
-        let capitalInput = null;
+        const pucList = db.getPUC();
+        let capitalAccount = pucList.find(a => a.esMovimiento && (a.codigo === '3.1.01' || a.nombre.toLowerCase().includes('capital social')));
+        if (!capitalAccount) {
+          saldosIniciales.ensurePatrimonioAccounts();
+          capitalAccount = db.getPUC().find(a => a.codigo === '3.1.01');
+        }
 
-        inputs.forEach(inp => {
-          const cod = inp.getAttribute('data-codigo');
-          if (cod.startsWith('3.1') || cod.includes('Capital')) {
-            capitalInput = inp;
-            return;
-          }
-          const val = Bs.parse(inp.value);
-          const nat = inp.getAttribute('data-naturaleza');
-          if (nat === 'D') totalDebe += val;
-          else totalHaber += val;
+        Object.keys(saldosIniciales.inputValues).forEach(cod => {
+          if (capitalAccount && cod === capitalAccount.codigo) return;
+          const val = saldosIniciales.inputValues[cod] || 0;
+          if (cod.startsWith('1')) totalActivo += val;
+          else if (cod.startsWith('2')) totalPasivo += val;
+          else if (cod.startsWith('3')) totalPatrimonioSinCapital += val;
         });
 
-        if (!capitalInput) {
-          showToast('No se encontró una cuenta de Capital Social para cuadrar automáticamente.', 'warning');
+        const requiredCapital = Bs.round(totalActivo - totalPasivo - totalPatrimonioSinCapital);
+
+        if (requiredCapital <= 0) {
+          showToast('El Pasivo y Patrimonio superan a los Activos. Revisa los saldos ingresados.', 'warning');
           return;
         }
 
-        const requiredCapital = Bs.round(totalDebe - totalHaber);
-        if (requiredCapital < 0) {
-          showToast('Los pasivos superan a los activos. Ajusta los valores manualmente.', 'warning');
-          return;
-        }
+        saldosIniciales.inputValues[capitalAccount.codigo] = requiredCapital;
 
-        capitalInput.value = Bs.format(requiredCapital).replace('Bs. ', '');
+        saldosIniciales.setClassFilter('3');
         saldosIniciales.updateTotals();
-        showToast('Diferencia asignada automáticamente a Capital Social.', 'success');
+        showToast(`Diferencia de ${Bs.format(requiredCapital)} asignada a Capital Social.`, 'success');
       },
 
       generateEntry: () => {
         const fecha = document.getElementById('apertura-fecha').value;
         const ref = document.getElementById('apertura-ref').value.trim() || 'APERTURA-001';
-        const inputs = document.querySelectorAll('.saldos-input');
+        const concepto = document.getElementById('apertura-concepto').value.trim() || 'Asiento de Apertura - Registro de Saldos Iniciales del Periodo (Balance de Apertura)';
+
+        const pucList = db.getPUC();
+        const pucMap = {};
+        pucList.forEach(a => { pucMap[a.codigo] = a; });
 
         const lines = [];
         let totalDebe = 0;
         let totalHaber = 0;
 
-        inputs.forEach(inp => {
-          const val = Bs.parse(inp.value);
-          if (val > 0) {
-            const cod = inp.getAttribute('data-codigo');
-            const nom = inp.getAttribute('data-nombre');
-            const nat = inp.getAttribute('data-naturaleza');
-            if (nat === 'D') {
-              lines.push({ codigo: cod, nombre: nom, detalle: 'Saldo inicial de apertura', debe: val, haber: 0 });
+        const sortedCodes = Object.keys(saldosIniciales.inputValues).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+        sortedCodes.forEach(cod => {
+          const val = Bs.round(saldosIniciales.inputValues[cod] || 0);
+          if (val > 0 && pucMap[cod]) {
+            const acc = pucMap[cod];
+            if (cod.startsWith('1')) {
+              lines.push({
+                codigo: cod,
+                nombre: acc.nombre,
+                detalle: 'Saldo inicial de apertura (Activo)',
+                debe: val,
+                haber: 0
+              });
               totalDebe += val;
-            } else {
-              lines.push({ codigo: cod, nombre: nom, detalle: 'Saldo inicial de apertura', debe: 0, haber: val });
+            } else if (cod.startsWith('2')) {
+              lines.push({
+                codigo: cod,
+                nombre: acc.nombre,
+                detalle: 'Saldo inicial de apertura (Pasivo)',
+                debe: 0,
+                haber: val
+              });
+              totalHaber += val;
+            } else if (cod.startsWith('3')) {
+              const isUtilidad = cod.startsWith('3.3') || acc.nombre.toLowerCase().includes('utilidad');
+              lines.push({
+                codigo: cod,
+                nombre: acc.nombre,
+                detalle: isUtilidad ? 'Utilidades Acumuladas anteriores' : 'Aporte de Capital de apertura',
+                debe: 0,
+                haber: val
+              });
               totalHaber += val;
             }
           }
@@ -4460,16 +4861,20 @@
         totalDebe = Bs.round(totalDebe);
         totalHaber = Bs.round(totalHaber);
 
-        if (lines.length < 2 || Math.abs(totalDebe - totalHaber) > 0.005) {
-          showToast('No se puede generar el asiento: montos insuficientes o descuadrados.', 'error');
+        if (lines.length < 2) {
+          showToast('El asiento de apertura requiere al menos dos cuentas con saldo.', 'warning');
+          return;
+        }
+
+        if (Math.abs(totalDebe - totalHaber) > 0.005) {
+          showToast(`Descuadre en Regla de Apertura: Total Activo (${Bs.format(totalDebe)}) no coincide con Pasivo + Patrimonio (${Bs.format(totalHaber)}).`, 'error');
           return;
         }
 
         const asientosList = db.getAsientos();
-        // Check if Asiento #1 is already apertura, ask to overwrite or prepend
         const existingApertura = asientosList.find(e => e.ref && e.ref.includes('APERTURA'));
         if (existingApertura) {
-          if (!confirm('Ya existe un asiento de apertura registrado. ¿Deseas reemplazarlo con estos nuevos saldos?')) return;
+          if (!confirm('Ya existe un asiento de apertura registrado. ¿Deseas reemplazarlo con este nuevo Balance de Apertura?')) return;
           const idx = asientosList.findIndex(e => e.id === existingApertura.id);
           asientosList.splice(idx, 1);
         }
@@ -4479,7 +4884,7 @@
           num: 1,
           fecha: fecha,
           ref: ref,
-          concepto: 'Asiento de Apertura - Registro de Saldos Iniciales del Periodo',
+          concepto: concepto,
           lines: lines,
           totalDebe: totalDebe,
           totalHaber: totalHaber
@@ -4490,7 +4895,7 @@
 
         saldosIniciales.closeModal();
         app.init();
-        showToast('¡Asiento de apertura generado exitosamente!', 'success');
+        showToast('¡Asiento de Apertura generado exitosamente con la regla contable!', 'success');
       }
     };
 
