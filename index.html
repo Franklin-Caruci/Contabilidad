@@ -646,7 +646,7 @@
             </div>
 
             <div class="border-t-2 border-slate-700 pt-3 flex items-center justify-between font-bold text-sm">
-              <span class="text-white">TOTAL ACTIVO</span>
+              <span class="text-white">TOTAL ACTIVO NETO (Según Libros)</span>
               <span id="bg-total-activo" class="font-mono text-emerald-400">Bs. 0,00</span>
             </div>
           </div>
@@ -1459,8 +1459,8 @@
             <div class="bg-slate-950/80 p-2.5 rounded-xl border border-emerald-900/60 flex items-start space-x-2">
               <span class="w-5 h-5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
               <div>
-                <span class="font-bold text-emerald-300 block">1. Cuentas de ACTIVO (Debe)</span>
-                <p class="text-slate-400 leading-snug mt-0.5">Naturaleza <strong>Deudora</strong>. En el asiento de apertura se registran en el <strong>DEBE</strong> (bienes, efectivo, bancos, inventarios y derechos).</p>
+                <span class="font-bold text-emerald-300 block">1. Cuentas de ACTIVO (Debe / Haber Valuación)</span>
+                <p class="text-slate-400 leading-snug mt-0.5">Naturaleza <strong>Deudora</strong> van al <strong>DEBE</strong>. Las cuentas de valuación (<strong>Depreciación Acumulada</strong> y Provisiones, naturaleza <strong>Acreedora</strong>) van al <strong>HABER</strong> deduciendo el valor según libros.</p>
               </div>
             </div>
 
@@ -1524,7 +1524,7 @@
                 <span class="w-7 h-7 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center font-extrabold text-sm">1</span>
                 <div>
                   <span class="font-bold text-xs block">1. ACTIVO</span>
-                  <span class="text-[10px] opacity-80">Débito (Debe)</span>
+                  <span class="text-[10px] opacity-80" id="tab-label-desc-1">Debe / Neto según Libros</span>
                 </div>
               </div>
               <div class="text-right">
@@ -1612,8 +1612,9 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
             
             <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-              <span class="text-[10px] uppercase text-emerald-400 block font-semibold">1. Total Activo (Debe)</span>
+              <span class="text-[10px] uppercase text-emerald-400 block font-semibold">1. Activo Neto (Libros)</span>
               <span id="apertura-total-debe" class="font-mono font-bold text-sm text-emerald-300">Bs. 0,00</span>
+              <span id="apertura-activo-breakdown" class="text-[9px] text-slate-400 font-mono block mt-0.5 hidden"></span>
             </div>
 
             <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
@@ -1627,7 +1628,7 @@
             </div>
 
             <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-              <span class="text-[10px] uppercase text-brand-400 block font-semibold">Total Pasivo + Patr.</span>
+              <span class="text-[10px] uppercase text-brand-400 block font-semibold">Total Pasivo + Patr. (Haber)</span>
               <span id="apertura-total-haber" class="font-mono font-bold text-sm text-brand-300">Bs. 0,00</span>
             </div>
 
@@ -2376,11 +2377,13 @@
         const level = parts.length > 0 ? parts.length : 1;
         document.getElementById('cuenta-nivel').value = level;
         
-        // Auto nature deduction based on class (first digit)
-        if (code.startsWith('1') || code.startsWith('5') || code.startsWith('6')) {
-          document.getElementById('cuenta-naturaleza').value = 'D';
-        } else if (code.startsWith('2') || code.startsWith('3') || code.startsWith('4')) {
+        // Auto nature deduction based on class and contra-asset keywords
+        const nameVal = (document.getElementById('cuenta-nombre')?.value || '').toLowerCase();
+        const isContra = nameVal.includes('depreciaci') || nameVal.includes('amortizaci') || nameVal.includes('provisi') || nameVal.includes('deterioro');
+        if (code.startsWith('2') || code.startsWith('3') || code.startsWith('4') || (code.startsWith('1') && isContra)) {
           document.getElementById('cuenta-naturaleza').value = 'A';
+        } else if (code.startsWith('1') || code.startsWith('5') || code.startsWith('6')) {
+          document.getElementById('cuenta-naturaleza').value = 'D';
         }
       },
 
@@ -2800,8 +2803,10 @@
           } else if (rawNat.startsWith('D') || rawNat.includes('DEB') || rawNat.includes('DEUD') || rawNat.includes('ACT') || rawNat.includes('GAS') || rawNat.includes('COS')) {
             nature = 'D';
           } else {
-            // Deduce from code class: 1, 5, 6 -> Deudora; 2, 3, 4 -> Acreedora
-            if (code.startsWith('2') || code.startsWith('3') || code.startsWith('4')) {
+            // Deduce from code class: 2, 3, 4 -> Acreedora; contra-assets in 1 -> Acreedora; rest -> Deudora
+            const nameLower = (name || '').toLowerCase();
+            const isContra = nameLower.includes('depreciaci') || nameLower.includes('amortizaci') || nameLower.includes('provisi') || nameLower.includes('deterioro');
+            if (code.startsWith('2') || code.startsWith('3') || code.startsWith('4') || (code.startsWith('1') && isContra)) {
               nature = 'A';
             } else {
               nature = 'D';
@@ -3484,7 +3489,9 @@
           excelImportDiario.newAccountsDetected.forEach(acc => {
             if (!currentPUC.some(a => a.codigo === acc.codigo)) {
               let nat = 'D';
-              if (acc.codigo.startsWith('2') || acc.codigo.startsWith('3') || acc.codigo.startsWith('4')) {
+              const nameLower = (acc.nombre || '').toLowerCase();
+              const isContra = nameLower.includes('depreciaci') || nameLower.includes('amortizaci') || nameLower.includes('provisi') || nameLower.includes('deterioro');
+              if (acc.codigo.startsWith('2') || acc.codigo.startsWith('3') || acc.codigo.startsWith('4') || (acc.codigo.startsWith('1') && isContra)) {
                 nat = 'A';
               }
               const parts = acc.codigo.split('.').filter(p => p.length > 0);
@@ -4345,6 +4352,8 @@
         const erData = estados.calculateNetIncome();
 
         let totalActivo = 0;
+        let totalActivoBruto = 0;
+        let totalActivoValuacion = 0;
         let totalPasivo = 0;
         let totalPatrimonio = 0;
 
@@ -4362,7 +4371,14 @@
           if (bal === 0) return;
 
           if (acc.codigo.startsWith('1')) {
-            totalActivo += bal;
+            if (acc.naturaleza === 'A') {
+              // Cuenta de valuación / depreciación acumulada: reduce el activo bruto
+              totalActivoValuacion += bal;
+              totalActivo -= bal;
+            } else {
+              totalActivoBruto += bal;
+              totalActivo += bal;
+            }
             activoItems.push({ ...acc, saldo: bal });
           } else if (acc.codigo.startsWith('2')) {
             totalPasivo += bal;
@@ -4382,13 +4398,22 @@
         const totalPasivoPatrimonio = Bs.round(totalPasivo + totalPatrimonio);
         const diff = Bs.round(Math.abs(totalActivo - totalPasivoPatrimonio));
 
-        // Render Activo Items
-        activoTree.innerHTML = activoItems.length > 0 ? activoItems.map(a => `
-          <div class="flex items-center justify-between py-1 border-b border-slate-800/40">
-            <span class="text-slate-300"><span class="font-mono text-slate-500 mr-1.5">${a.codigo}</span> ${a.nombre}</span>
-            <span class="font-mono font-medium text-slate-200">${Bs.format(a.saldo)}</span>
-          </div>
-        `).join('') : '<p class="text-slate-500 italic">Sin cuentas con saldo en Activo.</p>';
+        // Render Activo Items (showing contra-assets as deductions)
+        activoTree.innerHTML = activoItems.length > 0 ? activoItems.map(a => {
+          const isValuacion = a.naturaleza === 'A';
+          return `
+            <div class="flex items-center justify-between py-1 border-b border-slate-800/40 ${isValuacion ? 'text-rose-300' : ''}">
+              <span class="${isValuacion ? 'text-rose-300' : 'text-slate-300'}">
+                <span class="font-mono text-slate-500 mr-1.5">${a.codigo}</span>
+                ${a.nombre}
+                ${isValuacion ? '<span class="text-[9px] ml-1.5 px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-800 font-semibold uppercase">(-) Valuación</span>' : ''}
+              </span>
+              <span class="font-mono font-medium ${isValuacion ? 'text-rose-400 font-semibold' : 'text-slate-200'}">
+                ${isValuacion ? `(-) ${Bs.format(a.saldo)}` : Bs.format(a.saldo)}
+              </span>
+            </div>
+          `;
+        }).join('') : '<p class="text-slate-500 italic">Sin cuentas con saldo en Activo.</p>';
 
         // Render Pasivo Items
         pasivoTree.innerHTML = pasivoItems.length > 0 ? pasivoItems.map(p => `
@@ -4432,10 +4457,10 @@
 
         if (diff === 0) {
           eqBadge.className = 'p-3.5 rounded-2xl border bg-emerald-950/50 border-emerald-700 text-emerald-300 flex items-center justify-between text-xs';
-          eqText.textContent = '✓ Ecuación Fundamental Cuadrada: Total Activo = Total Pasivo + Patrimonio';
+          eqText.textContent = '✓ Ecuación Fundamental Cuadrada: Total Activo Neto = Total Pasivo + Total Patrimonio';
         } else {
           eqBadge.className = 'p-3.5 rounded-2xl border bg-rose-950/50 border-rose-700 text-rose-300 flex items-center justify-between text-xs';
-          eqText.textContent = '⚠ Descuadre en Balance General: Activo ≠ Pasivo + Patrimonio';
+          eqText.textContent = '⚠ Descuadre en Balance General: Activo Neto ≠ Pasivo + Patrimonio';
         }
       },
 
@@ -4572,8 +4597,8 @@
         if (tab3) tab3.className = saldosIniciales.activeClass === '3' ? activeClsStyle : inactiveClsStyle;
 
         if (saldosIniciales.activeClass === '1') {
-          if (groupLabel) groupLabel.textContent = 'Mostrando: 1. Activo (Naturaleza Deudora • DEBE)';
-          if (guidanceText) guidanceText.textContent = 'Ingresa los saldos de tus cuentas de Activo (Caja, Bancos, Inventarios, Mobiliario). Se imputarán al DEBE.';
+          if (groupLabel) groupLabel.textContent = 'Mostrando: 1. Activo (Debe / Valuación al Haber)';
+          if (guidanceText) guidanceText.textContent = 'Ingresa los saldos de tus cuentas de Activo (DEBE). Las cuentas de valuación como Depreciación Acumulada (naturaleza Acreedora) se registran al HABER deduciendo el valor según libros.';
         } else if (saldosIniciales.activeClass === '2') {
           if (groupLabel) groupLabel.textContent = 'Mostrando: 2. Pasivo (Naturaleza Acreedora • HABER)';
           if (guidanceText) guidanceText.textContent = 'Ingresa los saldos de tus cuentas de Pasivo (Proveedores, Cuentas por pagar, Obligaciones). Se imputarán al HABER.';
@@ -4601,27 +4626,39 @@
           const displayVal = val > 0 ? Bs.format(val).replace('Bs. ', '') : '';
           const isUtilidad = acc.codigo.startsWith('3.3') || acc.nombre.toLowerCase().includes('utilidad') || acc.nombre.toLowerCase().includes('retenid');
           const isCapital = acc.codigo.startsWith('3.1') || acc.nombre.toLowerCase().includes('capital social');
+          const isContraActivo = acc.codigo.startsWith('1') && acc.naturaleza === 'A';
 
           const natureBadge = acc.naturaleza === 'D'
             ? `<span class="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-950 text-emerald-300 border border-emerald-800">Deudora</span>`
             : `<span class="text-[10px] px-2 py-0.5 rounded font-mono bg-sky-950 text-sky-300 border border-sky-800">Acreedora</span>`;
 
-          const imputacionText = acc.naturaleza === 'D'
-            ? `<span class="font-bold text-emerald-400 font-mono text-[11px]">DEBE</span>`
-            : `<span class="font-bold text-sky-400 font-mono text-[11px]">HABER</span>`;
+          let imputacionText = '';
+          if (acc.codigo.startsWith('1')) {
+            if (acc.naturaleza === 'A') {
+              imputacionText = `<span class="font-bold text-rose-400 font-mono text-[11px] bg-rose-950/70 px-2 py-0.5 rounded border border-rose-800 shadow-sm" title="Cuenta complementaria de valuación: se imputa al HABER reduciendo el activo bruto">HABER (-)</span>`;
+            } else {
+              imputacionText = `<span class="font-bold text-emerald-400 font-mono text-[11px]">DEBE</span>`;
+            }
+          } else {
+            imputacionText = acc.naturaleza === 'D'
+              ? `<span class="font-bold text-emerald-400 font-mono text-[11px]">DEBE</span>`
+              : `<span class="font-bold text-sky-400 font-mono text-[11px]">HABER</span>`;
+          }
 
           let specialTag = '';
-          if (isUtilidad) {
+          if (isContraActivo) {
+            specialTag = `<span class="ml-1.5 px-1.5 py-0.5 rounded text-[9px] bg-rose-950 text-rose-300 border border-rose-700 font-semibold uppercase">Valuación / Deprec. (-)</span>`;
+          } else if (isUtilidad) {
             specialTag = `<span class="ml-1.5 px-1.5 py-0.5 rounded text-[9px] bg-sky-950 text-sky-300 border border-sky-700 font-semibold uppercase">Utilidad Acumulada</span>`;
           } else if (isCapital) {
             specialTag = `<span class="ml-1.5 px-1.5 py-0.5 rounded text-[9px] bg-amber-950 text-amber-300 border border-amber-700 font-semibold uppercase">Capital Social</span>`;
           }
 
           return `
-            <tr class="hover:bg-slate-800/40 transition-colors ${isUtilidad ? 'bg-sky-950/20' : (isCapital ? 'bg-amber-950/20' : '')}">
+            <tr class="hover:bg-slate-800/40 transition-colors ${isContraActivo ? 'bg-rose-950/15' : (isUtilidad ? 'bg-sky-950/20' : (isCapital ? 'bg-amber-950/20' : ''))}">
               <td class="py-2.5 px-3 font-mono font-medium text-brand-300">${acc.codigo}</td>
               <td class="py-2.5 px-3 text-slate-200">
-                <div class="flex items-center flex-wrap">
+                <div class="flex items-center flex-wrap gap-1">
                   <span class="font-medium">${acc.nombre}</span>
                   ${specialTag}
                 </div>
@@ -4634,7 +4671,7 @@
                   value="${displayVal}"
                   placeholder="0,00"
                   oninput="saldosIniciales.onSaldoChange('${acc.codigo}', this.value)"
-                  class="saldos-input w-36 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-right font-mono text-white focus:outline-none focus:border-brand-500 shadow-inner">
+                  class="saldos-input w-36 bg-slate-900 border ${isContraActivo ? 'border-rose-700/70 focus:border-rose-500' : 'border-slate-700 focus:border-brand-500'} rounded-xl px-2.5 py-1.5 text-xs text-right font-mono text-white focus:outline-none shadow-inner">
               </td>
             </tr>
           `;
@@ -4656,9 +4693,10 @@
         const pucMap = {};
         pucList.forEach(a => { pucMap[a.codigo] = a; });
 
-        let totalActivo = 0;    // Clase 1 (Debe)
-        let totalPasivo = 0;    // Clase 2 (Haber)
-        let totalPatrimonio = 0; // Clase 3 (Haber)
+        let totalActivoDebe = 0;      // Activos deudores (Bruto)
+        let totalActivoValuacion = 0; // Activos acreedores (Depreciación Acumulada, Deterioro, Provisiones)
+        let totalPasivo = 0;          // Pasivo (Haber)
+        let totalPatrimonio = 0;      // Patrimonio (Haber)
         let count1 = 0;
         let count2 = 0;
         let count3 = 0;
@@ -4666,8 +4704,14 @@
         Object.keys(saldosIniciales.inputValues).forEach(cod => {
           const val = saldosIniciales.inputValues[cod] || 0;
           if (val > 0) {
+            const acc = pucMap[cod];
+            const isNatureAcreedora = acc && acc.naturaleza === 'A';
             if (cod.startsWith('1')) {
-              totalActivo += val;
+              if (isNatureAcreedora) {
+                totalActivoValuacion += val;
+              } else {
+                totalActivoDebe += val;
+              }
               count1++;
             } else if (cod.startsWith('2')) {
               totalPasivo += val;
@@ -4679,11 +4723,23 @@
           }
         });
 
-        totalActivo = Bs.round(totalActivo);
+        totalActivoDebe = Bs.round(totalActivoDebe);
+        totalActivoValuacion = Bs.round(totalActivoValuacion);
+        // Activo Neto según Libros = Activo Bruto - Depreciación / Valuación Acumulada
+        const totalActivoNeto = Bs.round(totalActivoDebe - totalActivoValuacion);
+
         totalPasivo = Bs.round(totalPasivo);
         totalPatrimonio = Bs.round(totalPatrimonio);
-        const totalHaber = Bs.round(totalPasivo + totalPatrimonio);
-        const diff = Bs.round(Math.abs(totalActivo - totalHaber));
+        const totalPasivoPatrimonio = Bs.round(totalPasivo + totalPatrimonio);
+
+        // Sumas para el asiento contable (Partida Doble):
+        // Debe = Activos Deudores
+        // Haber = Valuación / Depreciación + Pasivo + Patrimonio
+        const totalAsientoDebe = totalActivoDebe;
+        const totalAsientoHaber = Bs.round(totalActivoValuacion + totalPasivo + totalPatrimonio);
+
+        // Ecuación Patrimonial Fundamental y Asiento coinciden algebraicamente:
+        const diff = Bs.round(Math.abs(totalActivoNeto - totalPasivoPatrimonio));
 
         // Update tabs mini totals
         const bDebe1 = document.getElementById('tab-badge-debe-1');
@@ -4693,24 +4749,37 @@
         const c2 = document.getElementById('tab-count-2');
         const c3 = document.getElementById('tab-count-3');
 
-        if (bDebe1) bDebe1.textContent = Bs.format(totalActivo);
+        if (bDebe1) {
+          bDebe1.textContent = Bs.format(totalActivoNeto);
+          bDebe1.title = totalActivoValuacion > 0 ? `Activo Bruto: ${Bs.format(totalActivoDebe)} | (-) Deprec: ${Bs.format(totalActivoValuacion)}` : `Total Activo: ${Bs.format(totalActivoDebe)}`;
+        }
         if (bHaber2) bHaber2.textContent = Bs.format(totalPasivo);
         if (bHaber3) bHaber3.textContent = Bs.format(totalPatrimonio);
-        if (c1) c1.textContent = `${count1} con saldo`;
+        if (c1) c1.textContent = totalActivoValuacion > 0 ? `${count1} ctas (Neto)` : `${count1} con saldo`;
         if (c2) c2.textContent = `${count2} con saldo`;
         if (c3) c3.textContent = `${count3} con saldo`;
 
         // Update summary cards
         const elTotalDebe = document.getElementById('apertura-total-debe');
+        const elBreakdown = document.getElementById('apertura-activo-breakdown');
         const elSubPasivo = document.getElementById('apertura-subtotal-pasivo');
         const elSubPatr = document.getElementById('apertura-subtotal-patrimonio');
         const elTotalHaber = document.getElementById('apertura-total-haber');
         const elDiff = document.getElementById('apertura-diferencia');
 
-        if (elTotalDebe) elTotalDebe.textContent = Bs.format(totalActivo);
+        if (elTotalDebe) elTotalDebe.textContent = Bs.format(totalActivoNeto);
+        if (elBreakdown) {
+          if (totalActivoValuacion > 0) {
+            elBreakdown.textContent = `Bruto: ${Bs.format(totalActivoDebe)} | (-) Deprec: ${Bs.format(totalActivoValuacion)}`;
+            elBreakdown.classList.remove('hidden');
+          } else {
+            elBreakdown.textContent = '';
+            elBreakdown.classList.add('hidden');
+          }
+        }
         if (elSubPasivo) elSubPasivo.textContent = Bs.format(totalPasivo);
         if (elSubPatr) elSubPatr.textContent = Bs.format(totalPatrimonio);
-        if (elTotalHaber) elTotalHaber.textContent = Bs.format(totalHaber);
+        if (elTotalHaber) elTotalHaber.textContent = Bs.format(totalPasivoPatrimonio);
         if (elDiff) elDiff.textContent = `Dif: ${Bs.format(diff)}`;
 
         // Update status alert badge
@@ -4719,19 +4788,20 @@
         const icon = document.getElementById('apertura-status-icon');
         const btn = document.getElementById('btn-generar-apertura');
 
-        if (totalActivo === 0 && totalHaber === 0) {
+        if (totalActivoDebe === 0 && totalPasivoPatrimonio === 0 && totalActivoValuacion === 0) {
           if (badge) badge.className = 'p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-amber-950/40 text-amber-300 border-amber-800/60';
-          if (text) text.textContent = 'Ingresa los saldos en 1. Activo, 2. Pasivo y 3. Patrimonio. Recuerda que Activo debe ser igual a Pasivo + Patrimonio.';
+          if (text) text.textContent = 'Ingresa los saldos en 1. Activo, 2. Pasivo y 3. Patrimonio. La regla exige que Activo Neto sea igual a Pasivo + Patrimonio.';
           if (icon) icon.setAttribute('data-lucide', 'alert-triangle');
           if (btn) btn.setAttribute('disabled', 'true');
-        } else if (diff === 0 && totalActivo > 0) {
+        } else if (diff === 0 && (totalActivoDebe > 0 || totalActivoNeto > 0)) {
           if (badge) badge.className = 'p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-emerald-950/60 text-emerald-300 border-emerald-700/70 shadow-md';
-          if (text) text.textContent = `✓ Regla Contable Cumplida: Activo (${Bs.format(totalActivo)}) = Pasivo (${Bs.format(totalPasivo)}) + Patrimonio (${Bs.format(totalPatrimonio)}).`;
+          const deprecNote = totalActivoValuacion > 0 ? ` [Deducida Deprec. Acum. de ${Bs.format(totalActivoValuacion)} al Haber]` : '';
+          if (text) text.textContent = `✓ Regla Contable Cumplida: Activo Neto según Libros (${Bs.format(totalActivoNeto)})${deprecNote} = Pasivo (${Bs.format(totalPasivo)}) + Patrimonio (${Bs.format(totalPatrimonio)}). Partida Doble en Asiento: Debe (${Bs.format(totalAsientoDebe)}) = Haber (${Bs.format(totalAsientoHaber)}).`;
           if (icon) icon.setAttribute('data-lucide', 'check-circle-2');
           if (btn) btn.removeAttribute('disabled');
         } else {
           if (badge) badge.className = 'p-3 rounded-xl border flex items-center justify-between text-xs font-semibold bg-rose-950/60 text-rose-300 border-rose-700/70';
-          if (text) text.textContent = `⚠ Descuadre en Regla de Apertura: Activo (${Bs.format(totalActivo)}) ≠ Pasivo + Patrimonio (${Bs.format(totalHaber)}). Diferencia: ${Bs.format(diff)}.`;
+          if (text) text.textContent = `⚠ Descuadre en Regla de Apertura: Activo Neto según Libros (${Bs.format(totalActivoNeto)}) ≠ Pasivo + Patrimonio (${Bs.format(totalPasivoPatrimonio)}). Diferencia: ${Bs.format(diff)}.`;
           if (icon) icon.setAttribute('data-lucide', 'alert-circle');
           if (btn) btn.setAttribute('disabled', 'true');
         }
@@ -4740,11 +4810,15 @@
       },
 
       autoBalanceUtilidadAcumulada: () => {
-        let totalActivo = 0;
+        let totalActivoDebe = 0;
+        let totalActivoValuacion = 0;
         let totalPasivo = 0;
         let totalPatrimonioSinUtilidad = 0;
 
         const pucList = db.getPUC();
+        const pucMap = {};
+        pucList.forEach(a => { pucMap[a.codigo] = a; });
+
         let utilidadAccount = pucList.find(a => a.esMovimiento && (a.codigo === '3.3.01' || a.nombre.toLowerCase().includes('utilidad')));
         if (!utilidadAccount) {
           saldosIniciales.ensurePatrimonioAccounts();
@@ -4754,31 +4828,44 @@
         Object.keys(saldosIniciales.inputValues).forEach(cod => {
           if (utilidadAccount && cod === utilidadAccount.codigo) return;
           const val = saldosIniciales.inputValues[cod] || 0;
-          if (cod.startsWith('1')) totalActivo += val;
-          else if (cod.startsWith('2')) totalPasivo += val;
-          else if (cod.startsWith('3')) totalPatrimonioSinUtilidad += val;
+          const acc = pucMap[cod];
+          if (cod.startsWith('1')) {
+            if (acc && acc.naturaleza === 'A') {
+              totalActivoValuacion += val;
+            } else {
+              totalActivoDebe += val;
+            }
+          } else if (cod.startsWith('2')) {
+            totalPasivo += val;
+          } else if (cod.startsWith('3')) {
+            totalPatrimonioSinUtilidad += val;
+          }
         });
 
-        const requiredUtilidad = Bs.round(totalActivo - totalPasivo - totalPatrimonioSinUtilidad);
+        const totalActivoNeto = Bs.round(totalActivoDebe - totalActivoValuacion);
+        const requiredUtilidad = Bs.round(totalActivoNeto - totalPasivo - totalPatrimonioSinUtilidad);
 
         if (requiredUtilidad <= 0) {
-          showToast('El Pasivo y Capital superan a los Activos. Revisa los saldos ingresados.', 'warning');
+          showToast('El Pasivo y Capital superan al Activo Neto. Revisa los saldos ingresados.', 'warning');
           return;
         }
 
         saldosIniciales.inputValues[utilidadAccount.codigo] = requiredUtilidad;
-
         saldosIniciales.setClassFilter('3');
         saldosIniciales.updateTotals();
         showToast(`Diferencia de ${Bs.format(requiredUtilidad)} asignada a Utilidades Acumuladas.`, 'success');
       },
 
       autoBalanceCapital: () => {
-        let totalActivo = 0;
+        let totalActivoDebe = 0;
+        let totalActivoValuacion = 0;
         let totalPasivo = 0;
         let totalPatrimonioSinCapital = 0;
 
         const pucList = db.getPUC();
+        const pucMap = {};
+        pucList.forEach(a => { pucMap[a.codigo] = a; });
+
         let capitalAccount = pucList.find(a => a.esMovimiento && (a.codigo === '3.1.01' || a.nombre.toLowerCase().includes('capital social')));
         if (!capitalAccount) {
           saldosIniciales.ensurePatrimonioAccounts();
@@ -4788,20 +4875,29 @@
         Object.keys(saldosIniciales.inputValues).forEach(cod => {
           if (capitalAccount && cod === capitalAccount.codigo) return;
           const val = saldosIniciales.inputValues[cod] || 0;
-          if (cod.startsWith('1')) totalActivo += val;
-          else if (cod.startsWith('2')) totalPasivo += val;
-          else if (cod.startsWith('3')) totalPatrimonioSinCapital += val;
+          const acc = pucMap[cod];
+          if (cod.startsWith('1')) {
+            if (acc && acc.naturaleza === 'A') {
+              totalActivoValuacion += val;
+            } else {
+              totalActivoDebe += val;
+            }
+          } else if (cod.startsWith('2')) {
+            totalPasivo += val;
+          } else if (cod.startsWith('3')) {
+            totalPatrimonioSinCapital += val;
+          }
         });
 
-        const requiredCapital = Bs.round(totalActivo - totalPasivo - totalPatrimonioSinCapital);
+        const totalActivoNeto = Bs.round(totalActivoDebe - totalActivoValuacion);
+        const requiredCapital = Bs.round(totalActivoNeto - totalPasivo - totalPatrimonioSinCapital);
 
         if (requiredCapital <= 0) {
-          showToast('El Pasivo y Patrimonio superan a los Activos. Revisa los saldos ingresados.', 'warning');
+          showToast('El Pasivo y Patrimonio superan al Activo Neto. Revisa los saldos ingresados.', 'warning');
           return;
         }
 
         saldosIniciales.inputValues[capitalAccount.codigo] = requiredCapital;
-
         saldosIniciales.setClassFilter('3');
         saldosIniciales.updateTotals();
         showToast(`Diferencia de ${Bs.format(requiredCapital)} asignada a Capital Social.`, 'success');
@@ -4827,33 +4923,69 @@
           if (val > 0 && pucMap[cod]) {
             const acc = pucMap[cod];
             if (cod.startsWith('1')) {
-              lines.push({
-                codigo: cod,
-                nombre: acc.nombre,
-                detalle: 'Saldo inicial de apertura (Activo)',
-                debe: val,
-                haber: 0
-              });
-              totalDebe += val;
+              if (acc.naturaleza === 'A') {
+                // Cuenta de valuación de activo (Depreciación Acumulada / Provisiones):
+                // Naturaleza Acreedora -> SE REGISTRA EN EL HABER
+                lines.push({
+                  codigo: cod,
+                  nombre: acc.nombre,
+                  detalle: 'Saldo inicial de apertura (Depreciación Acumulada / Valuación)',
+                  debe: 0,
+                  haber: val
+                });
+                totalHaber += val;
+              } else {
+                // Activo de naturaleza deudora -> SE REGISTRA EN EL DEBE
+                lines.push({
+                  codigo: cod,
+                  nombre: acc.nombre,
+                  detalle: 'Saldo inicial de apertura (Activo)',
+                  debe: val,
+                  haber: 0
+                });
+                totalDebe += val;
+              }
             } else if (cod.startsWith('2')) {
-              lines.push({
-                codigo: cod,
-                nombre: acc.nombre,
-                detalle: 'Saldo inicial de apertura (Pasivo)',
-                debe: 0,
-                haber: val
-              });
-              totalHaber += val;
+              if (acc.naturaleza === 'D') {
+                lines.push({
+                  codigo: cod,
+                  nombre: acc.nombre,
+                  detalle: 'Saldo inicial de apertura (Pasivo Deudor)',
+                  debe: val,
+                  haber: 0
+                });
+                totalDebe += val;
+              } else {
+                lines.push({
+                  codigo: cod,
+                  nombre: acc.nombre,
+                  detalle: 'Saldo inicial de apertura (Pasivo)',
+                  debe: 0,
+                  haber: val
+                });
+                totalHaber += val;
+              }
             } else if (cod.startsWith('3')) {
-              const isUtilidad = cod.startsWith('3.3') || acc.nombre.toLowerCase().includes('utilidad');
-              lines.push({
-                codigo: cod,
-                nombre: acc.nombre,
-                detalle: isUtilidad ? 'Utilidades Acumuladas anteriores' : 'Aporte de Capital de apertura',
-                debe: 0,
-                haber: val
-              });
-              totalHaber += val;
+              if (acc.naturaleza === 'D') {
+                lines.push({
+                  codigo: cod,
+                  nombre: acc.nombre,
+                  detalle: 'Saldo inicial de apertura (Patrimonio Deudor)',
+                  debe: val,
+                  haber: 0
+                });
+                totalDebe += val;
+              } else {
+                const isUtilidad = cod.startsWith('3.3') || acc.nombre.toLowerCase().includes('utilidad');
+                lines.push({
+                  codigo: cod,
+                  nombre: acc.nombre,
+                  detalle: isUtilidad ? 'Utilidades Acumuladas anteriores' : 'Aporte de Capital de apertura',
+                  debe: 0,
+                  haber: val
+                });
+                totalHaber += val;
+              }
             }
           }
         });
@@ -4867,7 +4999,7 @@
         }
 
         if (Math.abs(totalDebe - totalHaber) > 0.005) {
-          showToast(`Descuadre en Regla de Apertura: Total Activo (${Bs.format(totalDebe)}) no coincide con Pasivo + Patrimonio (${Bs.format(totalHaber)}).`, 'error');
+          showToast(`Descuadre en Regla de Apertura: Total Debe (${Bs.format(totalDebe)}) no coincide con Total Haber (${Bs.format(totalHaber)}).`, 'error');
           return;
         }
 
